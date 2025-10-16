@@ -1,9 +1,10 @@
 package backend.back_temp_chat.controller;
 
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 public class AuthController {
 
     @PostMapping("/login")
@@ -14,5 +15,10 @@ public class AuthController {
     @PostMapping("/register")
     public String register() {
         return "register";
+    }
+
+    @GetMapping
+    public String hi() {
+        return "hello";
     }
 }

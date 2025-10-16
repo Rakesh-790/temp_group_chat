@@ -1,7 +1,6 @@
 package backend.back_temp_chat.entity;
 
-
-import java.sql.Date;
+import java.util.Date;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
