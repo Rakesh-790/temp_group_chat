@@ -1,0 +1,8 @@
+# Dependency directories
+node_modules/
+
+# Environment variable files containing secrets
+.env
+.env.local
+.env.production
+.env.development
