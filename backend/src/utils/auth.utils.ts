@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { JWT_ACCESS_SECRET, JWT_REFRESH_SECRET } from '../../config/config';
+import { JWT_ACCESS_SECRET, JWT_REFRESH_SECRET } from '../config/config';
 import bcrypt from 'bcryptjs';
 
 export const generateAccessToken = (

@@ -1,10 +1,10 @@
+import cookieParser from "cookie-parser";
 import express, { Request, Response } from "express";
+import authRouter from '../src/modules/auth/auth.routes';
 
 export const app = express();
 
-app.get('/health', (req: Request, res: Response) => {
-    return res.status(200).json({
-        success: true,
-        message: "api is running fine"
-    });
-});
+app.use(express.json());
+app.use(cookieParser());
+
+app.use('/api/auth', authRouter);
