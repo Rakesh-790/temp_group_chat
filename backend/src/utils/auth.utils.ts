@@ -1,6 +1,9 @@
 import jwt from 'jsonwebtoken';
 import { JWT_ACCESS_SECRET, JWT_REFRESH_SECRET } from '../config/config';
 import bcrypt from 'bcryptjs';
+import { RefreshPayload } from '../types/session.types';
+import crypto from 'crypto';
+
 
 export const generateAccessToken = (
     id: string,
@@ -55,12 +58,12 @@ export const verifyAccessToken = (
 
 export const verifyRefreshToken = (
     token: string
-) => {
+) : RefreshPayload => {
 
     return jwt.verify(
         token,
         JWT_REFRESH_SECRET!
-    );
+    ) as RefreshPayload;
 
 };
 
@@ -68,14 +71,14 @@ export const generateSessionId = () : string => {
     return crypto.randomUUID();
 };
 
-export const hashRefreshToken = async (
-    refreshToken: string
-): Promise<string> => {
+export const hashRefreshToken = (
+    token: string
+): string => {
 
-    return await bcrypt.hash(
-        refreshToken,
-        12
-    );
+    return crypto
+        .createHash('sha256')
+        .update(token)
+        .digest('hex');
 
 };
 

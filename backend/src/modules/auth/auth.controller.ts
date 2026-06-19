@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { ACCESS_COOKIE_OPTIONS, REFRESH_COOKIE_OPTIONS } from "./auth.constants";
-import { loginUser, registerUser } from "./auth.service";
+import { loginUser, refreshAccessToken, registerUser } from "./auth.service";
 
 export const register = async (
     req: Request,
@@ -88,4 +88,42 @@ export const login = async (
         user
     });
 
+};
+
+export const refreshAccessTokenController = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+
+    const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+
+    if (!refreshToken) {
+        res.status(401).json({
+            success: false,
+            message: "Refresh token missing"
+        });
+        return;
+    }
+
+    const {
+        accessToken,
+        refreshToken: newRefreshToken
+    } = await refreshAccessToken(refreshToken);
+
+    res.cookie(
+        "accessToken",
+        accessToken,
+        ACCESS_COOKIE_OPTIONS
+    );
+
+    res.cookie(
+        "refreshToken",
+        newRefreshToken,
+        REFRESH_COOKIE_OPTIONS
+    );
+
+    res.status(200).json({
+        success: true,
+        message: "Token refreshed successfully"
+    });
 };
