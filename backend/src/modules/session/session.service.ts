@@ -87,3 +87,38 @@ export const invalidateSession = async (
 
     return session;
 };
+
+export const getUserSessions = async (userId: string) => {
+    
+    const sessions = await sessionModel.find({
+        user: userId,
+        isRevoked: false
+    }).sort({ createdAt: -1 });
+
+    return sessions
+};
+
+export const revokeSession = async (
+    sessionId: string,
+    userId: string
+) => {
+
+    const session = await sessionModel.findOne({
+        _id: sessionId,
+        user: userId,
+        isRevoked: false
+    });
+
+    if (!session) {
+        throw new AppError(
+            'Session not found',
+            404
+        );
+    }
+
+    session.isRevoked = true;
+
+    await session.save();
+
+    return session;
+};

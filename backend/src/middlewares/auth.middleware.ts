@@ -5,7 +5,7 @@ import { verifyAccessToken } from "../utils/auth.utils";
 import sessionModel from "../modules/session/session.model";
 import userModel from "../modules/auth/auth.model";
 
-interface AuthRequest extends Request{
+interface AuthRequest extends Request {
     user?: {
         id: string,
         role: string,
@@ -14,7 +14,7 @@ interface AuthRequest extends Request{
 };
 
 export const authMiddleware = catchAsync(
-    async(
+    async (
         req: AuthRequest,
         res: Response,
         next: NextFunction
@@ -23,17 +23,35 @@ export const authMiddleware = catchAsync(
         const accessToken = req.cookies.accessToken;
 
         if (!accessToken) {
-            new AppError(
+            return next(new AppError(
                 "Authentication Required",
                 401
+            )
             );
         };
 
-        const decoded = verifyAccessToken(accessToken) as { sessionId : string, id : string};
+        let decoded: {
+            sessionId: string;
+            id: string;
+        };
 
-        const session = await sessionModel.findById(decoded.sessionId);
+        try {
+            decoded = verifyAccessToken(accessToken) as {
+                sessionId: string;
+                id: string;
+            };
+        } catch {
+            return next(
+                new AppError(
+                    "Invalid or Expired Token",
+                    401
+                )
+            );
+        }
 
-        if(!session){
+        const session = await sessionModel.findOne({ sessionId: decoded.sessionId });
+
+        if (!session) {
             return next(
                 new AppError(
                     "Session not Found",

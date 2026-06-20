@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { ACCESS_COOKIE_OPTIONS, REFRESH_COOKIE_OPTIONS } from "./auth.constants";
-import { loginUser, refreshAccessToken, registerUser } from "./auth.service";
+import { loginUser, logout, logoutAll, refreshAccessToken, registerUser } from "./auth.service";
 import { catchAsync } from "../../utils/catchAsync";
+import { AuthRequest } from "../../types/auth.types";
 
 export const register = catchAsync(
     async (
@@ -131,6 +132,36 @@ export const refreshAccessTokenController = catchAsync(
         res.status(200).json({
             success: true,
             message: "Token refreshed successfully"
+        });
+    }
+);
+
+export const logoutUser = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+
+        await logout(req.user!.sessionId);
+
+        res.clearCookie('accessToken');
+        res.clearCookie('refreshToken');
+
+        res.status(200).json({
+            success: true,
+            message: 'Logged out successfully'
+        });
+    }
+);
+
+export const logoutAllDevices = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+
+        await logoutAll(req.user!.id);
+
+        res.clearCookie('accessToken');
+        res.clearCookie('refreshToken');
+
+        res.status(200).json({
+            success: true,
+            message: 'Logged out from all devices'
         });
     }
 );

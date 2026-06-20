@@ -1,6 +1,7 @@
 import { LoginData, LoginResponse, RegisterData } from "../../types/auth.types";
 import { AppError } from "../../utils/AppError";
 import { generateAccessToken, generateRefreshToken, generateSessionId, hashRefreshToken, verifyRefreshToken } from "../../utils/auth.utils";
+import sessionModel from "../session/session.model";
 import { createSession, findValidSession, invalidateSession, rotateSessionToken } from '../session/session.service';
 import userModel from "./auth.model";
 import bcrypt from "bcryptjs";
@@ -234,4 +235,37 @@ export const refreshAccessToken = async (
         accessToken,
         refreshToken: newRefreshToken
     };
+};
+
+export const logout = async (sessionId: string) => {
+
+    const session = await sessionModel.findOne({
+        _id: sessionId,
+        isRevoked: false
+    });
+
+    if (!session) {
+        throw new AppError('Session not found', 404);
+    }
+
+    session.isRevoked = true;
+    session.revokedAt = new Date();
+
+    await session.save();
+};
+
+export const logoutAll = async (userId: string) => {
+
+    await sessionModel.updateMany(
+        {
+            user: userId,
+            isRevoked: false
+        },
+        {
+            $set: {
+                isRevoked: true,
+                revokedAt: new Date()
+            }
+        }
+    );
 };
