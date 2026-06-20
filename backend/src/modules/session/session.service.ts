@@ -1,4 +1,5 @@
 import { CreateSessionData, ISession } from "../../types/session.types";
+import { AppError } from "../../utils/AppError";
 import sessionModel from "./session.model";
 
 export const createSession = async (sessionData: CreateSessionData) => {
@@ -22,15 +23,24 @@ export const findValidSession = async (
     const session = await sessionModel.findOne({ sessionId });
 
     if (!session) {
-        throw new Error("Session not Found");
+        throw new AppError(
+            "Session not Found",
+            404
+        );
     };
 
     if (session.isRevoked == true) {
-        throw new Error("Session revoked");
+        throw new AppError(
+            "Session revoked",
+            401
+        );
     };
 
     if (session.expiresAt < new Date()) {
-        throw new Error("Session is Expired");
+        throw new AppError(
+            "Session is Expired",
+            401
+        );
     };
 
     return session;

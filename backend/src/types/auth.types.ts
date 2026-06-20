@@ -1,3 +1,5 @@
+import { ISession } from "./session.types";
+
 export interface LoginData {
 
     email: string;
@@ -35,4 +37,13 @@ export interface RegisterData {
     userAgent?: string;
 
     deviceInfo?: string;
+};
+
+export interface AuthRequest extends Request {
+    user?: {
+        id: string,
+        role: string,
+        sessionId: string
+    };
+    session?: ISession
 };

@@ -1,4 +1,5 @@
 import { LoginData, LoginResponse, RegisterData } from "../../types/auth.types";
+import { AppError } from "../../utils/AppError";
 import { generateAccessToken, generateRefreshToken, generateSessionId, hashRefreshToken, verifyRefreshToken } from "../../utils/auth.utils";
 import { createSession, findValidSession, invalidateSession, rotateSessionToken } from '../session/session.service';
 import userModel from "./auth.model";
@@ -13,21 +14,33 @@ export const loginUser = async (
     const user = await userModel.findOne({ email });
 
     if (!user) {
-        throw new Error("Invalid Credentials");
+        throw new AppError(
+            "Invalid Credentials",
+            401
+        );
     };
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) {
-        throw new Error("Invalid Credentials");
+        throw new AppError(
+            "Invalid Credentials",
+            401
+        );
     };
 
     if (user.isBlocked) {
-        throw new Error('Account is blocked');
+        throw new AppError(
+            "Account is Blocked",
+            403
+        );
     };
 
     if (user.isDeleted) {
-        throw new Error('Account is deleted');
+        throw new AppError(
+            "Account is Deleted",
+            403
+        );
     };
 
     const { accessToken, refreshToken } = await createUserSession(
@@ -70,8 +83,9 @@ export const registerUser = async (
 
     if (existingEmail) {
 
-        throw new Error(
-            'Email already exists'
+        throw new AppError(
+            'Email already exists',
+            409
         );
 
     }
@@ -80,10 +94,9 @@ export const registerUser = async (
 
     if (existingUsername) {
 
-        throw new Error(
-
-            'Username already exists'
-
+        throw new AppError(
+            'Username already exists',
+            409
         );
 
     }
@@ -177,13 +190,19 @@ export const refreshAccessToken = async (
     if (!validToken) {
         await invalidateSession(session.sessionId);
 
-        throw new Error("Refresh token reuse detected");
+        throw new AppError(
+            "Refresh token reuse detected",
+            400
+        );
     };
 
     const user = await userModel.findById(payload.id);
 
     if (!user) {
-        throw new Error("User Not Found");
+        throw new AppError(
+            "User Not Found",
+            404
+        );
     };
 
     const accessToken = generateAccessToken(
