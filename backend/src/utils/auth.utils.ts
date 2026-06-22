@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { JWT_ACCESS_SECRET, JWT_REFRESH_SECRET } from '../config/config';
 import bcrypt from 'bcryptjs';
-import { RefreshPayload } from '../types/session.types';
+import { RefreshPayload } from '../modules/session/session.types';
 import crypto from 'crypto';
 
 

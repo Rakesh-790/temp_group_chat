@@ -1,8 +1,8 @@
 import { Response, NextFunction } from 'express';
 import { AppError } from '../utils/AppError';
 import sessionModel from '../modules/session/session.model';
-import { ISession } from '../types/session.types';
-import { AuthRequest } from '../types/auth.types';
+import { ISession } from '../modules/session/session.types';
+import { AuthRequest } from '../modules/auth/auth.types';
 
 export const sessionMiddleware = async (
     req: AuthRequest,

@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { ISession } from "./session.types";
+import { ISession } from "../session/session.types";
 
 export interface LoginData {
 

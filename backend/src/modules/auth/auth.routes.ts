@@ -3,16 +3,16 @@ import { login, logoutAllDevices, logoutUser, refreshAccessTokenController, regi
 import { authMiddleware } from '../../middlewares/auth.middleware';
 import sessionMiddleware from '../../middlewares/session.middleware';
 
-const router = express.Router();
+const authRouter = express.Router();
 
-router.post('/register', register);
+authRouter.post('/register', register);
 
-router.post('/login', login);
+authRouter.post('/login', login);
 
-router.post('/refresh', refreshAccessTokenController);
+authRouter.post('/refresh', refreshAccessTokenController);
 
-router.post('/logout', authMiddleware, sessionMiddleware, logoutUser);
+authRouter.post('/logout', authMiddleware, sessionMiddleware, logoutUser);
 
-router.post('/logoutAll', authMiddleware, sessionMiddleware, logoutAllDevices);
+authRouter.post('/logoutAll', authMiddleware, sessionMiddleware, logoutAllDevices);
 
-export default router;
+export default authRouter;

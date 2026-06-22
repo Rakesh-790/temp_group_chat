@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { AuthRequest } from "../../types/auth.types";
+import { AuthRequest } from "../auth/auth.types";
 import { catchAsync } from "../../utils/catchAsync";
 import { getUserSessions, revokeSession } from "./session.service";
 

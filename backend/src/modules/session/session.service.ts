@@ -1,4 +1,4 @@
-import { CreateSessionData, ISession } from "../../types/session.types";
+import { CreateSessionData, ISession } from "./session.types";
 import { AppError } from "../../utils/AppError";
 import sessionModel from "./session.model";
 

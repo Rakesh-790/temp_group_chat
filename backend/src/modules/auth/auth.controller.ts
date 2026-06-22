@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import { ACCESS_COOKIE_OPTIONS, REFRESH_COOKIE_OPTIONS } from "./auth.constants";
 import { loginUser, logout, logoutAll, refreshAccessToken, registerUser } from "./auth.service";
 import { catchAsync } from "../../utils/catchAsync";
-import { AuthRequest } from "../../types/auth.types";
+import { AuthRequest } from "../auth/auth.types";
+import { getMyProfile, updateProfile } from "../users/user.service";
 
 export const register = catchAsync(
     async (
@@ -163,5 +164,44 @@ export const logoutAllDevices = catchAsync(
             success: true,
             message: 'Logged out from all devices'
         });
+    }
+);
+
+export const getProfile = catchAsync(
+    async (
+        req: AuthRequest,
+        res: Response
+    ) => {
+
+        const profile = await getMyProfile(
+            req.user!.id
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Profile fetched successfully",
+            profile
+        });
+
+    }
+);
+
+export const updateUserProfile = catchAsync(
+    async (
+        req: AuthRequest,
+        res: Response
+    ) => {
+
+        const profile = await updateProfile(
+            req.user!.id,
+            req.body
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            profile
+        });
+
     }
 );

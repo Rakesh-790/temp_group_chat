@@ -36,6 +36,27 @@ const userSchema = new mongoose.Schema(
         isDeleted: {
             type: Boolean,
             default: false
+        },
+        avatar: {
+            type: String,
+            default: null
+        },
+        bio: {
+            type: String,
+            default: 'Hey there! I am using TempChat'
+        },
+        status: {
+            type: String,
+            enum: [ 'Online', 'Invisible' ],
+            default: 'Online'
+        },
+        isOnline: {
+            type: Boolean,
+            default: false
+        },
+        lastSeen: {
+            type: Date,
+            default: null
         }
     },
     {

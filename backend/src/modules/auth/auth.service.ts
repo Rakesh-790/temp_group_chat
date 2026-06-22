@@ -1,4 +1,4 @@
-import { LoginData, LoginResponse, RegisterData } from "../../types/auth.types";
+import { LoginData, LoginResponse, RegisterData } from "../auth/auth.types";
 import { AppError } from "../../utils/AppError";
 import { generateAccessToken, generateRefreshToken, generateSessionId, hashRefreshToken, verifyRefreshToken } from "../../utils/auth.utils";
 import sessionModel from "../session/session.model";
