@@ -38,8 +38,14 @@ const userSchema = new mongoose.Schema(
             default: false
         },
         avatar: {
-            type: String,
-            default: null
+            url: {
+                type: String,
+                default: null
+            },
+            key: {
+                type: String,
+                default: null
+            }
         },
         bio: {
             type: String,
@@ -47,7 +53,7 @@ const userSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: [ 'Online', 'Invisible' ],
+            enum: ['Online', 'Invisible'],
             default: 'Online'
         },
         isOnline: {

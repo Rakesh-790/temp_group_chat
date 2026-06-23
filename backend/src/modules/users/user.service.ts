@@ -1,10 +1,11 @@
 import { AppError } from "../../utils/AppError";
+import { deleteAvatarFromS3, uploadAvatarToS3 } from "../../utils/s3.utils";
 import userModel from "../auth/auth.model";
 import { UpdateProfileDTO, UserProfileResponse } from "./user.types";
 
 const mapUserProfile = (
     user: any
-) : UserProfileResponse => {
+): UserProfileResponse => {
     return {
         id: user._id.toString(),
         username: user.username,
@@ -17,13 +18,13 @@ const mapUserProfile = (
     };
 };
 
-export const getMyProfile = async(
-    userId : string
-) : Promise<UserProfileResponse> => {
+export const getMyProfile = async (
+    userId: string
+): Promise<UserProfileResponse> => {
 
     const user = await userModel.findById(userId);
 
-    if(!user){
+    if (!user) {
         throw new AppError(
             'User Not Found',
             404
@@ -33,26 +34,26 @@ export const getMyProfile = async(
     return mapUserProfile(user);
 };
 
-export const updateProfile = async(
+export const updateProfile = async (
     userId: string,
     data: UpdateProfileDTO
-) : Promise<UserProfileResponse> => {
+): Promise<UserProfileResponse> => {
 
     const user = await userModel.findById(userId);
 
-    if(!user){
+    if (!user) {
         throw new AppError(
             'User Not Found',
             404
         );
     };
 
-    if(data.username !== undefined){
+    if (data.username !== undefined) {
         const existingUser = await userModel.findOne({
             username: data.username
         });
 
-        if(existingUser && existingUser._id.toString() !== user.id){
+        if (existingUser && existingUser._id.toString() !== user.id) {
             throw new AppError(
                 'Username Already exists',
                 409
@@ -62,7 +63,7 @@ export const updateProfile = async(
         user.username = data.username;
     };
 
-    if(data.bio !== undefined){
+    if (data.bio !== undefined) {
         user.bio = data.bio
     };
 
@@ -73,4 +74,55 @@ export const updateProfile = async(
     await user.save();
 
     return mapUserProfile(user);
+};
+
+export const uploadAvatar = async (
+    userId: string,
+    file: Express.Multer.File
+) => {
+
+    if (!file) {
+        throw new AppError(
+            'Avatar is required',
+            400
+        );
+    };
+
+    const user = await userModel.findById(userId);
+
+    if (!user) {
+        throw new AppError(
+            'User Not Found',
+            404
+        );
+    };
+
+    const oldAvatarKey = user.avatar?.key;
+
+    console.log(oldAvatarKey)
+
+    const uploadedAvatar = await uploadAvatarToS3({
+        file,
+        userId
+    });
+
+    user.avatar = {
+        key: uploadedAvatar.key,
+        url: uploadedAvatar.url
+    };
+
+    await user.save();
+
+    if (oldAvatarKey) {
+        try {
+            await deleteAvatarFromS3(
+                oldAvatarKey
+            );
+        } catch (error) {
+            console.error('Failed to delete Old Avatar'),
+                error
+        };
+    };
+
+    return user.avatar;
 };
