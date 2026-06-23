@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { AuthRequest } from "../auth/auth.types";
-import { getMyProfile, updateProfile, uploadAvatar } from "./user.service";
+import { getMyProfile, searchUsers, updateProfile, uploadAvatar } from "./user.service";
 import { AppError } from "../../utils/AppError";
 
 export const getProfile = catchAsync(
@@ -71,6 +71,45 @@ export const uploadUserAvatar = catchAsync(
             success: true,
             message: 'Avatar uploaded successfully',
             data: avatar
+        });
+    }
+);
+
+export const searchUsersController = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+
+        if (!req.user) {
+            throw new AppError(
+                'Unauthorized',
+                401
+            );
+        }
+
+        const searchQuery = (req.query.q as string)?.trim();
+
+        if (!searchQuery) {
+            throw new AppError(
+                'Search query is required',
+                400
+            );
+        }
+
+        const page = Math.max(Number(req.query.page) || 1, 1);
+
+        const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 50);
+
+
+        const searchResult = await searchUsers(
+            req.user.id,
+            searchQuery,
+            page,
+            limit
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: 'Users fetched successfully',
+            data: searchResult
         });
     }
 );

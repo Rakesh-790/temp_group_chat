@@ -126,3 +126,45 @@ export const uploadAvatar = async (
 
     return user.avatar;
 };
+
+export const searchUsers = async (
+    currentUserId: string,
+    query: string,
+    page = 1,
+    limit = 20
+) => {
+
+    const skip = (page - 1) * limit;
+
+    const filter = {
+        _id: {
+            $ne: currentUserId
+        },
+        username: {
+            $regex: query,
+            $options: 'i'
+        }
+    };
+
+    const users = await userModel.find(filter)
+        .select(
+            '_id username avatar isOnline lastSeen'
+        )
+        .skip(skip)
+        .limit(limit)
+        .lean();
+
+    const total = await userModel.countDocuments(
+        filter
+    );
+
+    return {
+        users,
+        pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit)
+        }
+    };
+};
