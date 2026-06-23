@@ -252,6 +252,21 @@ export const logout = async (sessionId: string) => {
     session.revokedAt = new Date();
 
     await session.save();
+
+    const activeSessions = await sessionModel.countDocuments({
+        user: session.user,
+        isRevoked: false
+    });
+
+    if (activeSessions === 0) {
+        await userModel.findByIdAndUpdate(
+            session.user,
+            {
+                isOnline: false,
+                lastSeen: new Date()
+            }
+        );
+    };
 };
 
 export const logoutAll = async (userId: string) => {
@@ -266,6 +281,14 @@ export const logoutAll = async (userId: string) => {
                 isRevoked: true,
                 revokedAt: new Date()
             }
+        }
+    );
+
+    await userModel.findByIdAndUpdate(
+        userId,
+        {
+            isOnline: false,
+            lastSeen: new Date()
         }
     );
 };
