@@ -4,6 +4,7 @@ import { errorMiddleware } from "./middlewares/Error.middleware";
 import authRouter from "./modules/auth/auth.routes";
 import sessionRouter from "./modules/session/session.routes";
 import useRouter from "./modules/users/user.routes";
+import { groupRouter } from "./modules/groups/group.routes";
 
 export const app = express();
 
@@ -13,5 +14,6 @@ app.use(cookieParser());
 app.use('/api/auth', authRouter);
 app.use('/api/session', sessionRouter);
 app.use('/api/users', useRouter);
+app.use('/api/groups', groupRouter);
 
 app.use(errorMiddleware);
