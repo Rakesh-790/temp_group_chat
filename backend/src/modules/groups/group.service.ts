@@ -189,3 +189,51 @@ export const assignRole = async(
         role
     };
 };
+
+export const softDeleteGroup = async(
+    groupId: string,
+    requesterId: string
+) => {
+
+    const group = await groupModel.findById(groupId);
+
+    if (!group) {
+        throw new AppError(
+            'Group not found',
+            404
+        );
+    };
+
+    if(group.isDeleted) {
+        throw new AppError(
+            'Group already deleted',
+            400
+        );
+    };
+
+    if (group.expiresAt < new Date()) {
+        throw new AppError(
+            'Group is already expired',
+            400
+        );
+    };
+
+    if(group.owner.toString() !== requesterId){
+        throw new AppError(
+            'Only Owner can delete the group',
+            403
+        );
+    };
+
+    group.isDeleted = true;
+
+    group.deletedAt = new Date();
+
+    await group.save();
+
+    return {
+        groupId: group.id,
+        name : group.name,
+        deletedAt: group.deletedAt
+    };
+};

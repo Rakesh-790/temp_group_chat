@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { AuthRequest } from "../auth/auth.types";
-import { assignRole, createGroup, joinGroup } from "./group.service";
+import { assignRole, createGroup, joinGroup, softDeleteGroup } from "./group.service";
 import { success } from "zod";
 
 
@@ -68,7 +68,7 @@ export const assignMemberRole = catchAsync(
 
         const { userId, role } = req.body;
 
-        const groupId  = req.params.groupId as string;
+        const groupId = req.params.groupId as string;
 
         const result = await assignRole(
             groupId,
@@ -81,6 +81,27 @@ export const assignMemberRole = catchAsync(
             success: true,
             message: 'Role updated successfully',
             data: result
+        });
+    }
+);
+
+export const deleteTempGroup = catchAsync(
+    async (
+        req: AuthRequest,
+        res: Response
+    ) => {
+
+        const groupId  = req.params.groupId as string;
+
+        const group = await softDeleteGroup(
+            groupId,
+            req.user!.id
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: 'Group deleted successfully',
+            group
         });
     }
 );
