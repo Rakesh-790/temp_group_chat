@@ -82,7 +82,8 @@ const groupSchema = new mongoose.Schema<IGroup>(
         },
         deletedAt: {
             type: Date,
-            default: null
+            default: null,
+            expires:604800
         }
     },
     {
