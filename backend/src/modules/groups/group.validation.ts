@@ -1,3 +1,5 @@
+import mongoose from 'mongoose';
+import { group } from 'node:console';
 import { z } from 'zod';
 
 export const createGroupSchema = z.object({
@@ -41,3 +43,28 @@ export const inviteUserSchema = z.object({
             .min(1, 'User id is required')
     })
 });
+
+export const assignRoleSchema = z.object({
+
+    params: z.object({
+        groupId: z.string().refine(
+            value => mongoose.Types.ObjectId.isValid(value),
+            {
+                message: 'Invalid group id'
+            }
+        )
+    }),
+
+    body: z.object({
+        userId: z
+            .string()
+            .trim()
+            .min(1, 'User id is required'),
+
+        role: z.enum([
+            'OWNER',
+            'ADMIN',
+            'MEMBER'
+        ])
+    })
+})

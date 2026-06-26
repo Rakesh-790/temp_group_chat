@@ -1,7 +1,8 @@
 import { Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { AuthRequest } from "../auth/auth.types";
-import { createGroup, joinGroup } from "./group.service";
+import { assignRole, createGroup, joinGroup } from "./group.service";
+import { success } from "zod";
 
 
 export const createTempGroup = catchAsync(
@@ -56,5 +57,30 @@ export const joinTempGroup = catchAsync(
             group
         });
 
+    }
+);
+
+export const assignMemberRole = catchAsync(
+    async (
+        req: AuthRequest,
+        res: Response
+    ) => {
+
+        const { userId, role } = req.body;
+
+        const groupId  = req.params.groupId as string;
+
+        const result = await assignRole(
+            groupId,
+            req.user!.id,
+            userId,
+            role
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: 'Role updated successfully',
+            data: result
+        });
     }
 );

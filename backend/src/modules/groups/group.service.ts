@@ -105,3 +105,87 @@ export const joinGroup = async(
         expiresAt: group.expiresAt
     };
 };
+
+export const assignRole = async(
+    groupId: string,
+    requesterId : string,
+    targetUserId: string,
+    role: 'OWNER' | 'ADMIN' | 'MEMBER'
+) => {
+
+    const group = await groupModel.findById(groupId);
+
+    if (!group) {
+        throw new AppError(
+            'Group not found',
+            404
+        );
+    };
+
+    if(group.isDeleted){
+        throw new AppError(
+            'Group has been deleted',
+            400
+        );
+
+    };
+
+    if (group.expiresAt < new Date()) {
+        throw new AppError(
+            'Group has expired',
+            400
+        );
+    }
+
+    if (group.owner.toString() !== requesterId) {
+        throw new AppError(
+            'Only Owner can assign roles',
+            403
+        );
+    };
+
+    if (role === 'OWNER') {
+        throw new AppError(
+            'Owner role cannot be assigned. Transfer ownership instead.',
+            400
+        );
+
+    };
+
+    const member = group.members.find(
+        member => member.user.toString() === targetUserId
+    );
+
+    if(!member){
+        throw new AppError(
+            'User is not a member',
+            404
+        );
+    };
+
+    if(member.role === 'OWNER'){
+        throw new AppError(
+            'Owner role cannot be modified',
+            400
+        );
+    };
+
+    if (member.role === role) {
+
+        throw new AppError(
+            `User is already ${role}`,
+            400
+        );
+
+    };
+
+    member.role = role;
+
+    await group.save();
+
+    return {
+        groupId: group.id,
+        userId: targetUserId,
+        role
+    };
+};
