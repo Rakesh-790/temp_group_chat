@@ -1,8 +1,9 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { AuthRequest } from "../auth/auth.types";
-import { getMyProfile, searchUsers, updateProfile, uploadAvatar } from "./user.service";
+import { getAllUsers, getMyProfile, searchUsers, updateProfile, uploadAvatar } from "./user.service";
 import { AppError } from "../../utils/AppError";
+import { success } from "zod";
 
 export const getProfile = catchAsync(
     async (
@@ -113,3 +114,22 @@ export const searchUsersController = catchAsync(
         });
     }
 );
+
+export const getAllUsersController = catchAsync(
+    async(
+        req : Request,
+        res: Response
+    ) => {
+
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 5;
+
+        const users = await getAllUsers(page, limit);
+
+        return res.status(200).json({
+            success: true,
+            message: "All Users Fetched Successfully",
+            ...users
+        })
+    }
+)

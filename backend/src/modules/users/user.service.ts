@@ -168,3 +168,27 @@ export const searchUsers = async (
         }
     };
 };
+
+export const getAllUsers = async (
+    page: number = 1,
+    limit: number = 5
+) => {
+
+    const skip = (page - 1) * limit;
+
+    const users = await userModel
+        .find()
+        .select('-password -key -__v')
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 });
+
+    const totalUsers = await userModel.countDocuments();
+
+    return {
+        users,
+        totalUsers: totalUsers,
+        hasNextPage: page * limit < totalUsers,
+        hasPreviousPage : page > 1
+    };
+};

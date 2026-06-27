@@ -89,7 +89,7 @@ export const invalidateSession = async (
 };
 
 export const getUserSessions = async (userId: string) => {
-    
+
     const sessions = await sessionModel.find({
         user: userId,
         isRevoked: false
@@ -121,4 +121,34 @@ export const revokeSession = async (
     await session.save();
 
     return session;
+};
+
+export const getAllSessions = async (
+    page: number = 1,
+    limit: number = 5
+) => {
+
+    const skip = (page - 1) * limit;
+
+    const session = await sessionModel
+        .find()
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 });
+
+    const totalSessions = await sessionModel.countDocuments();
+
+    if (!session) {
+        throw new AppError(
+            'Session not Found',
+            404
+        );
+    };
+
+    return {
+        session,
+        totalSessions: totalSessions,
+        hasNextpage: page * limit < totalSessions,
+        hasPreviousPage: page > 1
+    };
 };

@@ -1,7 +1,7 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { AuthRequest } from "../auth/auth.types";
-import { assignRole, createGroup, joinGroup, softDeleteGroup } from "./group.service";
+import { assignRole, createGroup, getAllGroups, getGroupById, joinGroup, softDeleteGroup } from "./group.service";
 import { success } from "zod";
 
 
@@ -102,6 +102,43 @@ export const deleteTempGroup = catchAsync(
             success: true,
             message: 'Group deleted successfully',
             group
+        });
+    }
+);
+
+export const getGroupByIdController = catchAsync(
+    async(
+        req: Request,
+        res: Response
+    ) => {
+
+        const groupId = req.params.groupId as string;
+
+        const group = await getGroupById(groupId);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Group fetched successfully with Id',
+            group
+        })
+    }
+);
+
+export const getAllGroupsController = catchAsync(
+    async(
+        req: Request,
+        res: Response
+    ) => {
+
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 5;
+
+        const groups = await getAllGroups(page, limit);
+
+        return res.status(200).json({
+            success: true,
+            message: "All groups fetched successfully",
+            groups
         });
     }
 );

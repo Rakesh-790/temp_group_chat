@@ -2,7 +2,7 @@ import express from 'express';
 import { authMiddleware } from '../../middlewares/auth.middleware';
 import validate from '../../middlewares/validate.middleware';
 import { assignRoleSchema, createGroupSchema, deleteGroupSchema, joinGroupSchema } from './group.validation';
-import { assignMemberRole, createTempGroup, deleteTempGroup, joinTempGroup } from './group.controller';
+import { assignMemberRole, createTempGroup, deleteTempGroup, getAllGroupsController, getGroupByIdController, joinTempGroup } from './group.controller';
 
 export const groupRouter = express.Router();
 
@@ -13,3 +13,7 @@ groupRouter.post('/join', authMiddleware, validate(joinGroupSchema), joinTempGro
 groupRouter.patch('/:groupId/role', authMiddleware, validate(assignRoleSchema), assignMemberRole);
 
 groupRouter.delete('/:groupId', authMiddleware, validate(deleteGroupSchema), deleteTempGroup);
+
+groupRouter.get('/:groupId', getGroupByIdController);
+
+groupRouter.get('/', getAllGroupsController);

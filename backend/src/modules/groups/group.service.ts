@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import groupModel from './group.model';
 import { AppError } from '../../utils/AppError';
+import mongoose from 'mongoose';
 
 interface CreateGroupData {
     name: string,
@@ -34,7 +35,7 @@ export const createGroup = async (
                 user: ownerId,
                 role: 'OWNER'
             }
-        ], 
+        ],
         inviteCode,
         expiresAt
     });
@@ -50,7 +51,7 @@ export const createGroup = async (
     };
 };
 
-export const joinGroup = async(
+export const joinGroup = async (
     inviteCode: string,
     userId: string
 ) => {
@@ -59,28 +60,28 @@ export const joinGroup = async(
         inviteCode
     });
 
-    if(!group){
+    if (!group) {
         throw new AppError(
             'Group not Found',
             404
         );
     };
 
-    if(group.isDeleted){
+    if (group.isDeleted) {
         throw new AppError(
             'Group has been deleted',
             400
         );
     };
 
-    if(group.expiresAt < new Date()){
+    if (group.expiresAt < new Date()) {
         throw new AppError(
             'Group has expired',
             400
         );
     };
 
-    const isMember =  group.members.some(
+    const isMember = group.members.some(
         memeber => memeber.user.toString() === userId
     );
 
@@ -106,9 +107,9 @@ export const joinGroup = async(
     };
 };
 
-export const assignRole = async(
+export const assignRole = async (
     groupId: string,
-    requesterId : string,
+    requesterId: string,
     targetUserId: string,
     role: 'OWNER' | 'ADMIN' | 'MEMBER'
 ) => {
@@ -122,7 +123,7 @@ export const assignRole = async(
         );
     };
 
-    if(group.isDeleted){
+    if (group.isDeleted) {
         throw new AppError(
             'Group has been deleted',
             400
@@ -156,14 +157,14 @@ export const assignRole = async(
         member => member.user.toString() === targetUserId
     );
 
-    if(!member){
+    if (!member) {
         throw new AppError(
             'User is not a member',
             404
         );
     };
 
-    if(member.role === 'OWNER'){
+    if (member.role === 'OWNER') {
         throw new AppError(
             'Owner role cannot be modified',
             400
@@ -190,7 +191,7 @@ export const assignRole = async(
     };
 };
 
-export const softDeleteGroup = async(
+export const softDeleteGroup = async (
     groupId: string,
     requesterId: string
 ) => {
@@ -204,7 +205,7 @@ export const softDeleteGroup = async(
         );
     };
 
-    if(group.isDeleted) {
+    if (group.isDeleted) {
         throw new AppError(
             'Group already deleted',
             400
@@ -218,7 +219,7 @@ export const softDeleteGroup = async(
         );
     };
 
-    if(group.owner.toString() !== requesterId){
+    if (group.owner.toString() !== requesterId) {
         throw new AppError(
             'Only Owner can delete the group',
             403
@@ -233,7 +234,45 @@ export const softDeleteGroup = async(
 
     return {
         groupId: group.id,
-        name : group.name,
+        name: group.name,
         deletedAt: group.deletedAt
+    };
+};
+
+export const getGroupById = async (groupId: string) => {
+
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
+        throw new AppError('Invalid group id', 400);
+    }
+
+    const group = await groupModel.findById(groupId);
+
+    if (!group) {
+        throw new AppError('Group not found', 404);
+    }
+
+    return group;
+};
+
+export const getAllGroups = async (
+    page: number = 1,
+    limit: number = 5
+) => {
+
+    const skip = (page - 1) * limit;
+
+    const groups = await groupModel
+        .find()
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 });
+
+    const totalGroups = await groupModel.countDocuments();
+
+    return {
+        groups,
+        totalGroups: totalGroups,
+        hashNextPage: page * limit < totalGroups,
+        hasPreviousPage: page > 1
     };
 };
