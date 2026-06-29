@@ -1,6 +1,8 @@
+import "./jobs";
 import { app } from './app';
 import { PORT } from './config/config';
 import { connectDB } from './config/database';
+import { addDeleteGroupJob } from './jobs/queues/deleteGroup.queues';
 
 
 const startServer = async () => {
@@ -10,6 +12,7 @@ const startServer = async () => {
     });
 
     await connectDB();
+    await addDeleteGroupJob("test-group-id");
 }
 
 startServer();

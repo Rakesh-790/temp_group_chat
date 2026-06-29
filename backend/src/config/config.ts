@@ -10,3 +10,5 @@ export const AWS_ACCESS_KEY_ID : string | undefined = process.env.AWS_ACCESS_KEY
 export const AWS_SECRET_ACCESS_KEY : string | undefined = process.env.AWS_SECRET_ACCESS_KEY;
 export const AWS_REGION : string | undefined = process.env.AWS_REGION;
 export const AWS_BUCKET_NAME : string | undefined = process.env.AWS_BUCKET_NAME;
+export const REDIS_HOST: string | undefined = process.env.REDIS_HOST;
+export const REDIS_PORT: string | undefined = process.env.REDIS_PORT;

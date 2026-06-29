@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import groupModel from './group.model';
 import { AppError } from '../../utils/AppError';
 import mongoose from 'mongoose';
+import { addDeleteGroupJob } from '../../jobs/queues/deleteGroup.queues';
 
 interface CreateGroupData {
     name: string,
@@ -39,6 +40,11 @@ export const createGroup = async (
         inviteCode,
         expiresAt
     });
+
+    await addDeleteGroupJob(
+        group._id.toString(),
+        group.expiresAt
+    )
 
     await group.populate('owner', 'username');
 
@@ -275,4 +281,19 @@ export const getAllGroups = async (
         hashNextPage: page * limit < totalGroups,
         hasPreviousPage: page > 1
     };
+};
+
+export const deleteExpiredGroup = async (
+    groupId: string
+) => {
+
+    const group = await groupModel.findById(groupId);
+
+    if (!group) {
+        return;
+    }
+
+    await group.deleteOne();
+
+    console.log(`Group with ${groupId} deleted successfully.`);
 };
