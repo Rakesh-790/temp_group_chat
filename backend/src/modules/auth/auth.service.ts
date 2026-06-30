@@ -5,6 +5,7 @@ import sessionModel from "../session/session.model";
 import { createSession, findValidSession, invalidateSession, rotateSessionToken } from '../session/session.service';
 import userModel from "./auth.model";
 import bcrypt from "bcryptjs";
+import { setUserOffline, setUserOnline } from "../presence/presence.service";
 
 export const loginUser = async (
     loginData: LoginData
@@ -55,6 +56,8 @@ export const loginUser = async (
         deviceInfo
 
     );
+
+    await setUserOnline(user._id.toString());
 
     return { user, accessToken, refreshToken };
 };
@@ -128,6 +131,8 @@ export const registerUser = async (
         deviceInfo
 
     );
+
+    await setUserOnline(user._id.toString());
 
     return {
         user,
@@ -259,10 +264,11 @@ export const logout = async (sessionId: string) => {
     });
 
     if (activeSessions === 0) {
+        await setUserOffline(session.user.toString());
+
         await userModel.findByIdAndUpdate(
             session.user,
             {
-                isOnline: false,
                 lastSeen: new Date()
             }
         );
@@ -284,10 +290,11 @@ export const logoutAll = async (userId: string) => {
         }
     );
 
+    await setUserOffline(userId);
+
     await userModel.findByIdAndUpdate(
         userId,
         {
-            isOnline: false,
             lastSeen: new Date()
         }
     );
