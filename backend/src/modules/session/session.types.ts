@@ -15,13 +15,18 @@ export interface CreateSessionData {
 
     expiresAt: Date;
 };
-
 export interface ISession extends Document {
     user: Types.ObjectId;
     sessionId: string;
     refreshTokenHash: string;
+
+    userAgent?: string | null;
+    ipAddress?: string | null;
+    deviceInfo?: string | null;
+
     expiresAt: Date;
     lastActivityAt: Date;
+
     isRevoked: boolean;
     revokedAt?: Date | null;
 }

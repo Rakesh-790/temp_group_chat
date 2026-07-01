@@ -1,6 +1,7 @@
 import { CreateSessionData, ISession } from "./session.types";
 import { AppError } from "../../utils/AppError";
 import sessionModel from "./session.model";
+import { cachedSession, deleteCachedSession, getCachedSession } from "./session.cache";
 
 export const createSession = async (sessionData: CreateSessionData) => {
     const session = await sessionModel.create({
@@ -13,6 +14,8 @@ export const createSession = async (sessionData: CreateSessionData) => {
         expiresAt: sessionData.expiresAt
     });
 
+    await cachedSession(session);
+
     return session;
 };
 
@@ -20,16 +23,22 @@ export const findValidSession = async (
     sessionId: string
 ): Promise<ISession> => {
 
-    const session = await sessionModel.findOne({ sessionId });
+    let session = await getCachedSession(sessionId);
 
     if (!session) {
-        throw new AppError(
-            "Session not Found",
-            404
-        );
+        session = await sessionModel.findOne({ sessionId });
+
+        if (!session) {
+            throw new AppError(
+                "Session not Found",
+                404
+            );
+        };
+
+        await cachedSession(session);
     };
 
-    if (session.isRevoked == true) {
+    if (session.isRevoked) {
         throw new AppError(
             "Session revoked",
             401
@@ -42,7 +51,6 @@ export const findValidSession = async (
             401
         );
     };
-
     return session;
 };
 
@@ -52,7 +60,7 @@ export const rotateSessionToken = async (
     expiresAt: Date
 ): Promise<ISession | null> => {
 
-    return sessionModel.findOneAndUpdate(
+    const session = await sessionModel.findOneAndUpdate(
         {
             sessionId
         },
@@ -65,6 +73,12 @@ export const rotateSessionToken = async (
             new: true
         }
     );
+
+    if (session) {
+        await cachedSession(session);
+    };
+
+    return session;
 };
 
 export const invalidateSession = async (
@@ -84,6 +98,10 @@ export const invalidateSession = async (
             new: true
         }
     );
+
+    if (session) {
+        await deleteCachedSession(sessionId);
+    }
 
     return session;
 };
@@ -120,6 +138,8 @@ export const revokeSession = async (
 
     await session.save();
 
+    await deleteCachedSession(session.sessionId);
+
     return session;
 };
 
@@ -137,13 +157,6 @@ export const getAllSessions = async (
         .sort({ createdAt: -1 });
 
     const totalSessions = await sessionModel.countDocuments();
-
-    if (!session) {
-        throw new AppError(
-            'Session not Found',
-            404
-        );
-    };
 
     return {
         session,

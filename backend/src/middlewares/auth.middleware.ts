@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../utils/catchAsync";
 import { AppError } from "../utils/AppError";
 import { verifyAccessToken } from "../utils/auth.utils";
-import sessionModel from "../modules/session/session.model";
 import userModel from "../modules/auth/auth.model";
+import { findValidSession } from "../modules/session/session.service";
 
 interface AuthRequest extends Request {
     user?: {
@@ -24,9 +24,9 @@ export const authMiddleware = catchAsync(
 
         if (!accessToken) {
             return next(new AppError(
-                "Authentication Required",
-                401
-            )
+                    "Authentication Required",
+                    401
+                )
             );
         };
 
@@ -49,7 +49,7 @@ export const authMiddleware = catchAsync(
             );
         }
 
-        const session = await sessionModel.findOne({ sessionId: decoded.sessionId });
+        const session = await findValidSession(decoded.sessionId);
 
         if (!session) {
             return next(
@@ -83,7 +83,7 @@ export const authMiddleware = catchAsync(
         req.user = {
             id: user._id.toString(),
             role: user.role,
-            sessionId: session._id.toString()
+            sessionId: session.toString()
         };
 
         next();

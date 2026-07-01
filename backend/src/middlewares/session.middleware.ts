@@ -1,8 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AppError } from '../utils/AppError';
-import sessionModel from '../modules/session/session.model';
-import { ISession } from '../modules/session/session.types';
 import { AuthRequest } from '../modules/auth/auth.types';
+import { findValidSession } from '../modules/session/session.service';
 
 export const sessionMiddleware = async (
     req: AuthRequest,
@@ -18,19 +17,7 @@ export const sessionMiddleware = async (
         );
     }
 
-    const session = await sessionModel.findById(sessionId);
-
-    if (!session) {
-        return next(
-            new AppError('Session does not exist', 401)
-        );
-    }
-
-    if (session.isRevoked) {
-        return next(
-            new AppError('Session has been revoked', 401)
-        );
-    }
+    const session = await findValidSession(sessionId);
 
     req.session = session;
 
