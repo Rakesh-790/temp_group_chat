@@ -1,7 +1,7 @@
 import { CreateSessionData, ISession } from "./session.types";
 import { AppError } from "../../utils/AppError";
 import sessionModel from "./session.model";
-import { cachedSession, deleteCachedSession, getCachedSession } from "./session.cache";
+import {  cacheSession, deleteCachedSession, getCachedSession } from "./session.cache";
 
 export const createSession = async (sessionData: CreateSessionData) => {
     const session = await sessionModel.create({
@@ -14,7 +14,7 @@ export const createSession = async (sessionData: CreateSessionData) => {
         expiresAt: sessionData.expiresAt
     });
 
-    await cachedSession(session);
+    await cacheSession(session);
 
     return session;
 };
@@ -35,7 +35,7 @@ export const findValidSession = async (
             );
         };
 
-        await cachedSession(session);
+        await cacheSession(session);
     };
 
     if (session.isRevoked) {
@@ -75,7 +75,7 @@ export const rotateSessionToken = async (
     );
 
     if (session) {
-        await cachedSession(session);
+        await cacheSession(session);
     };
 
     return session;

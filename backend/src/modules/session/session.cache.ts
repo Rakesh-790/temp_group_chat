@@ -23,7 +23,7 @@ export const getCachedSession = async (
     return JSON.parse(cachedSession);
 };
 
-export const cachedSession = async (
+export const cacheSession = async (
     session: ISession
 ): Promise<void> => {
 
@@ -31,12 +31,14 @@ export const cachedSession = async (
 
     const ttlInSeconds = Math.max(
         0,
-        Math.floor(new Date(session.expiresAt).getTime() - Date.now()) / 1000
+        Math.floor(
+            (new Date(session.expiresAt).getTime() - Date.now()) / 1000
+        )
     );
 
     if (ttlInSeconds <= 0) {
         return;
-    };
+    }
 
     await redis.set(
         cacheKey,
