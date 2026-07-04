@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Test Client</title>
+</head>
+
+<body>
+
+    <h2>Socket.IO Test Client</h2>
+
+    <input id="token" type="text" placeholder="Paste Access Token" style="width: 600px;" />
+
+    <br><br>
+
+    <button id="connect">
+        Connect
+    </button>
+
+    <button id="disconnect">
+        Disconnect
+    </button>
+
+    <pre id="logs"></pre>
+
+    <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
+
+    <script>
+
+        let socket = null;
+
+        const logs = document.getElementById("logs");
+
+        function log(message) {
+            logs.textContent += message + "\n";
+        }
+
+        document
+            .getElementById("connect")
+            .addEventListener("click", () => {
+
+                const token =
+                    document.getElementById("token").value;
+
+                socket = io("http://localhost:3000", {
+                    autoConnect: false,
+
+                    auth: {
+                        accessToken: token
+                    },
+
+                    transports: ["websocket"], // optional for debugging
+
+                    withCredentials: true
+                });
+
+                socket.on("connect", () => {
+                    log("✅ Connected");
+                    log("Socket Id: " + socket.id);
+                });
+
+                socket.on("connect_error", (error) => {
+                    log("❌ " + error.message);
+                });
+
+                socket.on("disconnect", (reason) => {
+                    log("Disconnected: " + reason);
+                });
+
+                socket.connect();
+
+            });
+
+        document
+            .getElementById("disconnect")
+            .addEventListener("click", () => {
+
+                if (socket) {
+                    socket.disconnect();
+                }
+
+            });
+
+    </script>
+
+</body>
+
+</html>

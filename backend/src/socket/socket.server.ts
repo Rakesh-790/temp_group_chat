@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import { Server as HttpServer } from 'http';
 import { registerSocketEvents } from "./socket.event";
 import { CLIENT_URL } from "../config/config";
+import { socketAuthMiddleware } from "../middlewares/socket.middleware";
 
 let io: Server;
 
@@ -17,6 +18,8 @@ export const initializeSocket = (
             }
         }
     );
+
+    io.use(socketAuthMiddleware);
 
     io.on('connection', (socket) => {
         registerSocketEvents(socket);
