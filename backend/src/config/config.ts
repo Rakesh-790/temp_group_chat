@@ -12,3 +12,4 @@ export const AWS_REGION : string | undefined = process.env.AWS_REGION;
 export const AWS_BUCKET_NAME : string | undefined = process.env.AWS_BUCKET_NAME;
 export const REDIS_HOST: string | undefined = process.env.REDIS_HOST;
 export const REDIS_PORT: string | undefined = process.env.REDIS_PORT;
+export const CLIENT_URL: string | undefined = process.env.CLIENT_URL;

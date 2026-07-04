@@ -48,3 +48,9 @@ export interface AuthRequest extends Request {
     };
     session?: ISession
 };
+
+export interface AuthenticatedUser {
+    id: string;
+    role: string;
+    sessionId: string;
+}

@@ -1,6 +1,6 @@
-import { LoginData, LoginResponse, RegisterData } from "../auth/auth.types";
+import { AuthenticatedUser, LoginData, LoginResponse, RegisterData } from "../auth/auth.types";
 import { AppError } from "../../utils/AppError";
-import { generateAccessToken, generateRefreshToken, generateSessionId, hashRefreshToken, verifyRefreshToken } from "../../utils/auth.utils";
+import { generateAccessToken, generateRefreshToken, generateSessionId, hashRefreshToken, verifyAccessToken, verifyRefreshToken } from "../../utils/auth.utils";
 import sessionModel from "../session/session.model";
 import { createSession, findValidSession, invalidateSession, rotateSessionToken } from '../session/session.service';
 import userModel from "./auth.model";
@@ -241,6 +241,61 @@ export const refreshAccessToken = async (
         refreshToken: newRefreshToken
     };
 };
+
+export const authenticateAccessToken = async (
+    accessToken: string
+): Promise<AuthenticatedUser> => {
+
+    let decoded: {
+        sessionId: string;
+        id: string;
+    };
+
+    try {
+        decoded = verifyAccessToken(accessToken) as {
+            sessionId: string;
+            id: string;
+        };
+    } catch {
+        throw new AppError(
+            "Invalid or Expired Token",
+            401
+        )
+    }
+
+    const session = await findValidSession(decoded.sessionId);
+
+    if (!session) {
+        throw new AppError(
+            "Session not Found",
+            401
+        )
+
+    };
+
+    if (session.isRevoked) {
+
+        throw new AppError(
+            "Session Revoked",
+            401
+        )
+    };
+
+    const user = await userModel.findById(decoded.id);
+
+    if (!user) {
+        throw new AppError(
+            "User not Found",
+            404
+        )
+    };
+
+    return {
+        id: user._id.toString(),
+        role: user.role,
+        sessionId: session.toString()
+    };
+}
 
 export const logout = async (sessionId: string) => {
 
