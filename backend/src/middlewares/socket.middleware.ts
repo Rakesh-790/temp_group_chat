@@ -59,7 +59,6 @@ export const socketAuthMiddleware = async (
 
         let accessToken: string | undefined;
 
-        // 1. Try to get access token from cookies (Production)
         const cookieHeader = socket.handshake.headers.cookie;
 
         if (cookieHeader) {
@@ -67,12 +66,10 @@ export const socketAuthMiddleware = async (
             accessToken = cookies.accessToken;
         }
 
-        // 2. If cookie is not available, use handshake auth (Temporary Testing)
         if (!accessToken) {
             accessToken = socket.handshake.auth.accessToken;
         }
 
-        // 3. Reject if no token found
         if (!accessToken) {
             return next(
                 new AppError(
@@ -82,7 +79,6 @@ export const socketAuthMiddleware = async (
             );
         }
 
-        // 4. Authenticate token
         const authenticatedUser = await authenticateAccessToken(
             accessToken
         );
