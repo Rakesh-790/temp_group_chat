@@ -23,6 +23,14 @@
         Disconnect
     </button>
 
+    <button id="joinRoom">
+        Join Room
+    </button>
+
+    <button id="leaveRoom">
+        Leave Room
+    </button>
+
     <pre id="logs"></pre>
 
     <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
@@ -80,6 +88,36 @@
                 if (socket) {
                     socket.disconnect();
                 }
+
+            });
+
+        document
+            .getElementById("joinRoom")
+            .addEventListener("click", () => {
+
+                if (!socket) {
+                    log("❌ Socket not connected");
+                    return;
+                }
+
+                socket.emit("room:join", "group-123");
+
+                log("📥 Join Room Event Sent");
+
+            });
+
+        document
+            .getElementById("leaveRoom")
+            .addEventListener("click", () => {
+
+                if (!socket) {
+                    log("❌ Socket not connected");
+                    return;
+                }
+
+                socket.emit("room:leave", "group-123");
+
+                log("📤 Leave Room Event Sent");
 
             });
 

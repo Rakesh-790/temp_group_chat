@@ -4,6 +4,7 @@ import { registerSocketEvents } from "./socket.event";
 import { CLIENT_URL } from "../config/config";
 import { socketAuthMiddleware } from "../middlewares/socket.middleware";
 import { socketManager } from "./socket.manager";
+import { registerRoomHandlers } from "./socket.room";
 
 let io: Server;
 
@@ -28,6 +29,8 @@ export const initializeSocket = (
         socketManager.registerSocket(userId, socket);
 
         registerSocketEvents(socket);
+
+        registerRoomHandlers(socket);
 
         socket.on('disconnect', (reason) => {
             socketManager.removeSocket(userId, socket);
