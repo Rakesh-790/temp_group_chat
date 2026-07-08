@@ -1,22 +1,62 @@
 import { Socket } from "socket.io";
+import { ensureUserIsMember, getGroupById } from "../modules/groups/group.service";
+import { joinRoomSchema, leaveRoomSchema } from "./socket.validation";
+import { handleSocketError } from "./socket.error";
 
 export const registerRoomHandlers = (
     socket: Socket
-) : void => {
+): void => {
 
-    socket.on('room:join', (roomId: string) => {
-        socket.join(roomId);
+    socket.on('room:join', async (payload, callback?: (response: {
+        success: boolean;
+        message: string;
+    }) => void) => {
+        try {
+            const { roomId } = joinRoomSchema.parse(payload);
 
-        console.log(`${socket.id} joined ${roomId}`);
+            const userId = socket.data.user.id;
 
-        console.log("Rooms:", [...socket.rooms]);
+            const group = await getGroupById(roomId);
+
+            ensureUserIsMember(group, userId);
+
+            socket.join(roomId);
+
+            console.log(`${socket.id} joined ${roomId}`);
+
+            console.log("Rooms:", [...socket.rooms]);
+
+            callback?.({
+                success: true,
+                message: "Joined room successfully."
+            });
+
+        } catch (error: any) {
+            handleSocketError(error, callback);
+        };
     });
 
-    socket.on('room:leave', (roomId: string) => {
-        socket.join(roomId);
+    socket.on('room:leave', (payload, callback?: (response: {
+        success: boolean;
+        message: string;
+    }) => void) => {
+        try {
+            const { roomId } = leaveRoomSchema.parse(payload);
 
-        console.log(`${socket.id} leave ${roomId}`);
+            socket.leave(roomId);
 
-        console.log("Rooms:", [...socket.rooms]);
+            console.log(`${socket.id} left ${roomId}`);
+
+            console.log("Rooms:", [...socket.rooms]);
+
+            callback?.({
+                success: true,
+                message: "Left room successfully."
+            });
+
+        } catch (error: any) {
+            handleSocketError(error, callback);
+
+        };
     });
 };

@@ -100,7 +100,10 @@
                     return;
                 }
 
-                socket.emit("room:join", "group-123");
+                socket.emit("room:join", {roomId: "6a4e01817f0ef5bca3edf803"},
+                (response) => {
+                            console.log(response);
+                });
 
                 log("📥 Join Room Event Sent");
 
@@ -115,7 +118,10 @@
                     return;
                 }
 
-                socket.emit("room:leave", "group-123");
+                socket.emit("room:leave", {roomId : "6a4e01817f0ef5bca3edf803"},
+                (response) => {
+                    console.log(response);
+                });
 
                 log("📤 Leave Room Event Sent");
 

@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import groupModel from './group.model';
+import groupModel, { IGroup } from './group.model';
 import { AppError } from '../../utils/AppError';
 import mongoose from 'mongoose';
 import { addDeleteGroupJob } from '../../jobs/queues/deleteGroup.queues';
@@ -87,16 +87,7 @@ export const joinGroup = async (
         );
     };
 
-    const isMember = group.members.some(
-        memeber => memeber.user.toString() === userId
-    );
-
-    if (isMember) {
-        throw new AppError(
-            'Already a member of this group',
-            400
-        );
-    };
+    ensureUserIsNotMember(group, userId);
 
     group.members.push({
         user: userId as any,
@@ -296,4 +287,39 @@ export const deleteExpiredGroup = async (
     await group.deleteOne();
 
     console.log(`Group with ${groupId} deleted successfully.`);
+};
+
+export const ensureUserIsMember = (
+    group: IGroup,
+    userId: string
+): void => {
+
+    const isMember = group.members.some(
+        member => member.user.toString() === userId
+    );
+
+    if (!isMember) {
+        throw new AppError(
+            "User is not a member of this group",
+            403
+        );
+    };
+};
+
+export const ensureUserIsNotMember = (
+    group: IGroup,
+    userId: string
+): void => {
+
+    const isMember = group.members.some(
+        member => member.user.toString() === userId
+    );
+
+    if (isMember) {
+        throw new AppError(
+            "Already a member of this group",
+            400
+        );
+    }
+
 };
