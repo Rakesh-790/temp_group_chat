@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { AuthRequest } from "../auth/auth.types";
-import { getAllUsers, getMyProfile, searchUsers, updateProfile, uploadAvatar } from "./user.service";
+import { getAllUsers, getMyProfile, getUserPresence, searchUsers, updateProfile, uploadAvatar } from "./user.service";
 import { AppError } from "../../utils/AppError";
-import { success } from "zod";
 
 export const getProfile = catchAsync(
     async (
@@ -132,4 +131,18 @@ export const getAllUsersController = catchAsync(
             ...users
         })
     }
-)
+);
+
+export const getUserPresenceController = catchAsync(
+    async (req, res) => {
+
+        const userId = req.params.userId as string;
+
+        const presence = await getUserPresence(userId);
+
+        return res.status(200).json({
+            success: true,
+            data: presence
+        });
+    }
+);

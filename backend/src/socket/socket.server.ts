@@ -5,16 +5,17 @@ import { CLIENT_URL } from "../config/config";
 import { socketAuthMiddleware } from "../middlewares/socket.middleware";
 import { socketManager } from "./socket.manager";
 import { registerRoomHandlers } from "./socket.room";
+import { handleUserConnected, handleUserDisconnected } from "../modules/presence/user.presence";
 
 let io: Server;
 
 export const initializeSocket = (
     httpServer: HttpServer
-) : Server => {
+): Server => {
 
     io = new Server(httpServer,
         {
-            cors:{
+            cors: {
                 origin: CLIENT_URL,
                 credentials: true
             }
@@ -23,28 +24,38 @@ export const initializeSocket = (
 
     io.use(socketAuthMiddleware);
 
-    io.on('connection', (socket) => {
-        const userId = socket.data.user.id;
+    io.on("connection", async (socket) => {
+        try {
+            const userId = socket.data.user.id;
 
-        socketManager.registerSocket(userId, socket);
+            socketManager.registerSocket(userId, socket);
 
-        registerSocketEvents(socket);
+            await handleUserConnected(userId, io);
 
-        registerRoomHandlers(socket);
+            registerSocketEvents(socket);
+            registerRoomHandlers(socket);
 
-        socket.on('disconnect', (reason) => {
-            socketManager.removeSocket(userId, socket);
+            socket.on("disconnect", async (reason) => {
+                try {
+                    socketManager.removeSocket(userId, socket);
 
-            console.log(
-                `Socket Disconnected: ${socket.id} (${reason})`
-            );
-        });
+                    await handleUserDisconnected(userId, io);
+
+                    console.log(`Socket Disconnected: ${socket.id} (${reason})`);
+                } catch (error) {
+                    console.error("Presence disconnect error:", error);
+                }
+            });
+        } catch (error) {
+            console.error("Presence connection error:", error);
+            socket.disconnect(true);
+        }
     });
 
     return io;
 };
 
-export const getIo = () : Server => {
+export const getIo = (): Server => {
 
     if (!io) {
         throw new Error("Socket.IO is not been initialize");

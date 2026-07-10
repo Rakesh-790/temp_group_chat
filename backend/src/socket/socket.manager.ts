@@ -32,6 +32,11 @@ class SocketManager{
         );
     };
 
+    getSocketCount(userId: string): number {
+
+        return this.userSockets.get(userId)?.size ?? 0;
+    }
+
     getUserSockets(userId: string): Socket[]{
 
         return Array.from(this.userSockets.get(userId) ?? []);

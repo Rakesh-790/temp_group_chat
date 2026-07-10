@@ -192,3 +192,71 @@ export const getAllUsers = async (
         hasPreviousPage : page > 1
     };
 };
+
+export const getUserPresence = async (
+    userId: string
+): Promise<{
+    isOnline: boolean;
+    lastSeen: Date | null;
+}> => {
+
+    const user = await userModel
+        .findById(userId)
+        .select("isOnline lastSeen");
+
+    if (!user) {
+        throw new AppError("User not found", 404);
+    }
+
+    return {
+        isOnline: user.isOnline,
+        lastSeen: user.lastSeen ?? null
+    };
+};
+
+export const markUserOnline = async(
+    userId: string
+) : Promise<void> => {
+
+    const user = await userModel.findByIdAndUpdate(
+        userId,
+        {
+            isOnline: true
+        },
+        {
+            new: true
+        }
+    );
+
+    if (!user) {
+        throw new AppError(
+            'User Not Found',
+            404
+        );
+    };
+
+};
+
+export const markUserOffline = async(
+    userId: string
+) : Promise<void> => {
+
+    const user = await userModel.findByIdAndUpdate(
+        userId,
+        {
+            isOnline: false,
+            lastSeen: new Date()
+        },
+        {
+            new: true
+        }
+    );
+
+    if (!user) {
+        throw new AppError(
+            'User Not Found',
+            404
+        );
+    };
+
+};
