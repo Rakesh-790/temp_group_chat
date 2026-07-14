@@ -1,6 +1,7 @@
 import { Server, Socket } from "socket.io";
 import { registerRoomHandlers } from "./socket.room";
 import { registerMessageHandlers } from "./socket.message";
+import { registerReadHandlers } from "./socket.reads";
 
 export const registerSocketEvents = (
     io: Server,
@@ -12,4 +13,6 @@ export const registerSocketEvents = (
     registerRoomHandlers(socket);
 
     registerMessageHandlers(io, socket);
+
+    registerReadHandlers(io, socket);
 }

@@ -48,3 +48,19 @@ export interface MessageResponse {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export interface MarkMessageReadInput{
+    messageIds: string[];
+    userId: string;
+    groupId: string;
+}
+
+export interface ReadMessagePayload{
+    messageIds: string[];
+}
+
+export interface MessageReadUpdate{
+    messageIds: string[];
+    userId: string;
+    readAt: Date;
+}

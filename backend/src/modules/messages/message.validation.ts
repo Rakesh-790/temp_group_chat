@@ -1,8 +1,13 @@
 import { z } from "zod";
 import { MessageType } from "./message.model";
+import mongoose from "mongoose";
+
+export const isValidObjectId = (value: string): boolean => {
+    return mongoose.Types.ObjectId.isValid(value);
+};
 
 export const attachmentSchema = z.object({
-    url: z.string().url(),
+    url: z.url(),
     key: z.string().min(1),
     fileName: z.string().min(1),
     mimeType: z.string().min(1),
@@ -24,11 +29,35 @@ export const sendMessageSchema = z.object({
     const hasContent = !!data.content?.trim();
     const hasAttachments = data.attachments.length > 0;
 
-    if(!hasContent && !hasAttachments){
+    if (!hasContent && !hasAttachments) {
         ctx.addIssue({
             code: "custom",
-            message: "Message must contain either content or at least one attachment",
+            message: "Message must contain either content or at least one attachment.",
             path: ["content"]
         });
-    }
+    };
+});
+
+export const markMessageReadSchema = z.object({
+    groupId: z
+        .string()
+        .trim()
+        .refine(isValidObjectId, {
+            error: "Invalid group id"
+        }),
+    messageIds: z
+        .array(
+            z.string()
+                .trim()
+                .refine(
+                    isValidObjectId, {
+                    error: "Invalid message id"
+                }))
+        .min(1, { error: "At Least one message ID is required" })
+        .refine(
+            ids => new Set(ids).size === ids.length,
+            {
+                error: "duplicate messageIds are not allowed."
+            }
+        )
 });

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { ensureUserIsMember, getGroupById } from "../groups/group.service";
 import { IMessage, Message } from "./message.model";
-import { CreateMessageInput } from "./message.types";
+import { CreateMessageInput, MarkMessageReadInput, MessageReadUpdate } from "./message.types";
 import { AppError } from "../../utils/AppError";
 
 export const createMessage = async(
@@ -72,4 +72,64 @@ export const ensureMessageSender = (
             403
         );
     };
+};
+
+export const hasUserReadMessage = (
+    message: IMessage,
+    userId: string
+): boolean => {
+
+    return message.readBy.some(
+        receipt => receipt.user.toString() === userId
+    );
+
+};
+
+export const markMessageAsRead = async(
+    input: MarkMessageReadInput
+): Promise<MessageReadUpdate> => {
+
+    const { groupId, messageIds, userId} = input;
+
+    const group = await getGroupById(groupId);
+
+    ensureUserIsMember(group, userId);
+
+    const readAt = new Date();
+
+    const updatedMessages: IMessage[] = [];
+
+    for (const messageId of messageIds){
+        const message = await ensureMessageExists(messageId);
+
+        if(message.group.toString() !== groupId){
+            throw new AppError(
+                "Message does not belong to this group",
+                400
+            );
+        };
+
+        if (hasUserReadMessage(message, userId)) {
+            continue;
+        };
+
+        await Message.findByIdAndUpdate(
+            messageId,
+            {
+                $push: {
+                    readBy: {
+                        user: new mongoose.Types.ObjectId(userId),
+                        readAt
+                    }
+                }
+            },
+            {
+                new: true
+            }
+        );
+
+        updatedMessages.push(message);
+    };
+
+    return { messageIds, userId, readAt};
 };

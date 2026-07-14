@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { group } from 'node:console';
 import { z } from 'zod';
 
 export const createGroupSchema = z.object({
