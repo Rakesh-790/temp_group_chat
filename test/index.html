@@ -4,32 +4,397 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Socket.IO Test Client</title>
+    <title>Group Chat</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface-2: #242836;
+            --border: #2e3345;
+            --text: #e8eaef;
+            --text-muted: #8b92a8;
+            --accent: #6366f1;
+            --accent-hover: #5558e3;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bubble-other: #242836;
+            --bubble-self: #4338ca;
+            --radius: 12px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 720px;
+            height: min(90vh, 820px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Header */
+        .header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface-2);
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .header-top h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            transition: background 0.2s;
+        }
+
+        .status-dot.connected {
+            background: var(--success);
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+        }
+
+        .status-dot.error {
+            background: var(--danger);
+        }
+
+        .auth-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .auth-row input {
+            flex: 1;
+        }
+
+        .controls-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        input[type="text"] {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.875rem;
+            padding: 8px 12px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent);
+        }
+
+        input[type="text"]::placeholder {
+            color: var(--text-muted);
+        }
+
+        button {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 8px 14px;
+            transition: background 0.15s, border-color 0.15s;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            background: var(--surface-2);
+            border-color: #3d4460;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        #connect {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        #connect:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+        }
+
+        #disconnect {
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        #disconnect:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        #joinRoom {
+            color: var(--success);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        #joinRoom:hover {
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        #leaveRoom {
+            color: var(--warning);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        #leaveRoom:hover {
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        /* Chat area */
+        .chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            scroll-behavior: smooth;
+        }
+
+        .chat::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            text-align: center;
+            gap: 8px;
+            padding: 40px 20px;
+        }
+
+        .empty-state svg {
+            opacity: 0.3;
+            margin-bottom: 4px;
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+        }
+
+        .empty-state small {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 75%;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.self {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .message.other {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        .message.system {
+            align-self: center;
+            max-width: 100%;
+        }
+
+        .message-sender {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+            padding: 0 4px;
+        }
+
+        .message-bubble {
+            padding: 10px 14px;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+
+        .message.other .message-bubble {
+            background: var(--bubble-other);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.self .message-bubble {
+            background: var(--bubble-self);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.system .message-bubble {
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border: 1px dashed var(--border);
+            border-radius: 20px;
+        }
+
+        .message-time {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+            padding: 0 4px;
+        }
+
+        /* Composer */
+        .composer {
+            padding: 14px 16px;
+            border-top: 1px solid var(--border);
+            background: var(--surface-2);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .composer input {
+            flex: 1;
+        }
+
+        #sendMessage {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            padding: 8px 18px;
+        }
+
+        #sendMessage:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+        }
+
+        #sendMessage:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Hidden debug log */
+        #logs {
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
 
-    <h2>Socket.IO Test Client</h2>
+    <div class="app">
 
-    <input id="token" type="text" placeholder="Paste Access Token" style="width: 600px;" />
+        <header class="header">
+            <div class="header-top">
+                <h1>Group Chat</h1>
+                <div class="status">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">Disconnected</span>
+                </div>
+            </div>
 
-    <br><br>
+            <div class="auth-row">
+                <input id="token" type="text" placeholder="Paste access token" />
+            </div>
 
-    <button id="connect">
-        Connect
-    </button>
+            <div class="controls-row">
+                <button id="connect">Connect</button>
+                <button id="disconnect">Disconnect</button>
+                <button id="joinRoom">Join Room</button>
+                <button id="leaveRoom">Leave Room</button>
+            </div>
+        </header>
 
-    <button id="disconnect">
-        Disconnect
-    </button>
+        <div class="chat" id="chat">
+            <div class="empty-state" id="emptyState">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                <p>No messages yet</p>
+                <small>Connect, join a room, and start chatting</small>
+            </div>
+        </div>
 
-    <button id="joinRoom">
-        Join Room
-    </button>
+        <div class="composer">
+            <input id="message" type="text" placeholder="Type a message…" />
+            <button id="sendMessage">Send Message</button>
+        </div>
 
-    <button id="leaveRoom">
-        Leave Room
-    </button>
+    </div>
 
     <pre id="logs"></pre>
 
@@ -38,94 +403,209 @@
     <script>
 
         let socket = null;
+        let currentUserId = null;
+
+        const GROUP_ID = "6a55c4bf6a60c589a1024e0f";
 
         const logs = document.getElementById("logs");
+        const chat = document.getElementById("chat");
+        const emptyState = document.getElementById("emptyState");
+        const statusDot = document.getElementById("statusDot");
+        const statusText = document.getElementById("statusText");
+        const messageInput = document.getElementById("message");
+        const sendBtn = document.getElementById("sendMessage");
 
         function log(message) {
             logs.textContent += message + "\n";
         }
 
-        document
-            .getElementById("connect")
-            .addEventListener("click", () => {
+        function setStatus(state, text) {
+            statusDot.className = "status-dot" + (state ? " " + state : "");
+            statusText.textContent = text;
+        }
 
-                const token =
-                    document.getElementById("token").value;
+        function hideEmptyState() {
+            if (emptyState) {
+                emptyState.remove();
+            }
+        }
 
-                socket = io("http://localhost:3000", {
-                    autoConnect: false,
-
-                    auth: {
-                        accessToken: token
-                    },
-
-                    transports: ["websocket"], // optional for debugging
-
-                    withCredentials: true
-                });
-
-                socket.on("connect", () => {
-                    log("✅ Connected");
-                    log("Socket Id: " + socket.id);
-                });
-
-                socket.on("connect_error", (error) => {
-                    log("❌ " + error.message);
-                });
-
-                socket.on("disconnect", (reason) => {
-                    log("Disconnected: " + reason);
-                });
-
-                socket.connect();
-
+        function formatTime(date) {
+            return new Date(date).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit"
             });
+        }
 
-        document
-            .getElementById("disconnect")
-            .addEventListener("click", () => {
+        function appendMessage({ type, sender, content, createdAt, isSelf }) {
+            hideEmptyState();
 
-                if (socket) {
-                    socket.disconnect();
-                }
+            const el = document.createElement("div");
+            el.className = "message " + type;
 
-            });
+            if (type === "system") {
+                el.innerHTML = `<div class="message-bubble">${content}</div>`;
+            } else {
+                const senderLabel = isSelf
+                    ? "You"
+                    : (typeof sender === "object" ? sender.name || sender._id : sender);
 
-        document
-            .getElementById("joinRoom")
-            .addEventListener("click", () => {
+                el.innerHTML = `
+                    <span class="message-sender">${senderLabel}</span>
+                    <div class="message-bubble">${escapeHtml(content)}</div>
+                    <span class="message-time">${formatTime(createdAt || new Date())}</span>
+                `;
+            }
 
-                if (!socket) {
-                    log("❌ Socket not connected");
-                    return;
-                }
+            chat.appendChild(el);
+            chat.scrollTop = chat.scrollHeight;
+        }
 
-                socket.emit("room:join", {roomId: "6a4e01817f0ef5bca3edf803"},
-                (response) => {
-                            console.log(response);
-                });
+        function appendSystemMessage(text) {
+            appendMessage({ type: "system", content: text });
+            log(text);
+        }
 
-                log("📥 Join Room Event Sent");
+        function escapeHtml(str) {
+            const div = document.createElement("div");
+            div.textContent = str;
+            return div.innerHTML;
+        }
 
-            });
+        function getUserIdFromToken(token) {
+            try {
+                const payload = token.split(".")[1];
+                const decoded = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+                return decoded.id ? String(decoded.id) : null;
+            } catch {
+                return null;
+            }
+        }
 
-        document
-            .getElementById("leaveRoom")
-            .addEventListener("click", () => {
+        function sendMessage() {
+            if (!socket) {
+                appendSystemMessage("Socket not connected");
+                return;
+            }
 
-                if (!socket) {
-                    log("❌ Socket not connected");
-                    return;
-                }
+            const content = messageInput.value.trim();
+            if (!content) return;
 
-                socket.emit("room:leave", {roomId : "6a4e01817f0ef5bca3edf803"},
+            socket.emit(
+                "message:send",
+                {
+                    groupId: GROUP_ID,
+                    type: "TEXT",
+                    content
+                },
                 (response) => {
                     console.log(response);
-                });
+                    if (response && !response.success) {
+                        appendSystemMessage("Failed to send: " + (response.message || "Unknown error"));
+                    }
+                }
+            );
 
-                log("📤 Leave Room Event Sent");
+            messageInput.value = "";
+        }
 
+        document.getElementById("connect").addEventListener("click", () => {
+
+            const token = document.getElementById("token").value;
+            currentUserId = getUserIdFromToken(token);
+
+            if (socket) {
+                socket.disconnect();
+                socket.removeAllListeners();
+            }
+
+            socket = io("http://localhost:3000", {
+                autoConnect: false,
+                auth: { accessToken: token },
+                transports: ["websocket"],
+                withCredentials: true
             });
+
+            socket.on("connect", () => {
+                setStatus("connected", "Connected · " + socket.id.slice(0, 8));
+                appendSystemMessage("Connected to server");
+            });
+
+            socket.on("connect_error", (error) => {
+                setStatus("error", "Connection failed");
+                appendSystemMessage("Connection error: " + error.message);
+            });
+
+            socket.on("disconnect", (reason) => {
+                setStatus("", "Disconnected");
+                appendSystemMessage("Disconnected: " + reason);
+            });
+
+            socket.on("message:new", (message) => {
+                console.log(message);
+
+                const senderId = typeof message.sender === "object"
+                    ? String(message.sender._id)
+                    : String(message.sender);
+
+                const isSelf = currentUserId && senderId === currentUserId;
+
+                appendMessage({
+                    type: isSelf ? "self" : "other",
+                    sender: message.sender,
+                    content: message.content,
+                    createdAt: message.createdAt,
+                    isSelf
+                });
+            });
+
+            socket.connect();
+        });
+
+        document.getElementById("disconnect").addEventListener("click", () => {
+            if (socket) {
+                socket.disconnect();
+            }
+        });
+
+        document.getElementById("joinRoom").addEventListener("click", () => {
+
+            if (!socket) {
+                appendSystemMessage("Socket not connected");
+                return;
+            }
+
+            socket.emit("room:join", { roomId: GROUP_ID }, (response) => {
+                console.log(response);
+            });
+
+            appendSystemMessage("Joined room");
+
+        });
+
+        document.getElementById("leaveRoom").addEventListener("click", () => {
+
+            if (!socket) {
+                appendSystemMessage("Socket not connected");
+                return;
+            }
+
+            socket.emit("room:leave", { roomId: GROUP_ID }, (response) => {
+                console.log(response);
+            });
+
+            appendSystemMessage("Left room");
+
+        });
+
+        document.getElementById("sendMessage").addEventListener("click", sendMessage);
+
+        messageInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
 
     </script>
 

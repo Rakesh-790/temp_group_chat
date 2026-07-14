@@ -1,7 +1,6 @@
 import { Socket } from "socket.io";
 import { ensureUserIsMember, getGroupById } from "../modules/groups/group.service";
 import { joinRoomSchema, leaveRoomSchema } from "./socket.validation";
-import { handleSocketError } from "./socket.error";
 import { socketEvent } from "./socket.wrapper";
 
 export const registerRoomHandlers = (

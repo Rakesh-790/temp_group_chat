@@ -6,6 +6,7 @@ import { socketAuthMiddleware } from "../middlewares/socket.middleware";
 import { socketManager } from "./socket.manager";
 import { registerRoomHandlers } from "./socket.room";
 import { handleUserConnected, handleUserDisconnected } from "../modules/presence/user.presence";
+import { registerMessageHandlers } from "./socket.message";
 
 let io: Server;
 
@@ -32,8 +33,7 @@ export const initializeSocket = (
 
             await handleUserConnected(userId, io);
 
-            registerSocketEvents(socket);
-            registerRoomHandlers(socket);
+            registerSocketEvents(io, socket);
 
             socket.on("disconnect", async (reason) => {
                 try {
