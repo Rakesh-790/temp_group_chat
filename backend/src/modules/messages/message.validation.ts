@@ -61,3 +61,30 @@ export const markMessageReadSchema = z.object({
             }
         )
 });
+
+export const markMessageDeliveredSchema = z.object({
+    groupId: z
+        .string()
+        .trim()
+        .refine(isValidObjectId, {
+            error: "Invalid group id."
+        }),
+
+    messageIds: z
+        .array(
+            z.string()
+                .trim()
+                .refine(isValidObjectId, {
+                    error: "Invalid message id."
+                })
+        )
+        .min(1, {
+            error: "Atleast one message ID is required"
+        })
+        .refine(
+            ids => new Set(ids).size === ids.length,
+            {
+                error: "Duplicate messageIds are not allowed."
+            }
+        )
+});

@@ -62,7 +62,7 @@ export const socketAuthMiddleware = async (
         const cookieHeader = socket.handshake.headers.cookie;
 
         if (cookieHeader) {
-            const cookies = cookie.parse(cookieHeader);
+            const cookies = cookie.parseCookie(cookieHeader);
             accessToken = cookies.accessToken;
         }
 
@@ -85,8 +85,6 @@ export const socketAuthMiddleware = async (
 
         // 5. Store authenticated user on socket
         socket.data.user = authenticatedUser;
-
-        console.log("✅ Socket Authenticated:", authenticatedUser.id);
 
         next();
 

@@ -8,7 +8,7 @@ export interface CreateMessageInput {
     content?: string;
     attachments?: MessageAttachment[];
     replyTo?: string;
-}
+};
 
 export interface MessageAttachment {
     url: string;
@@ -16,12 +16,12 @@ export interface MessageAttachment {
     fileName: string;
     mimeType: string;
     size: number;
-}
+};
 
 export interface ReadReceipt {
     user: Types.ObjectId;
     readAt: Date;
-}
+};
 
 export interface SendMessagePayload {
     groupId: string;
@@ -29,7 +29,7 @@ export interface SendMessagePayload {
     content?: string;
     attachments?: MessageAttachment[];
     replyTo?: string;
-}
+};
 
 export interface MessageResponse {
     _id: Types.ObjectId;
@@ -47,20 +47,33 @@ export interface MessageResponse {
     deletedAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
-}
+};
 
 export interface MarkMessageReadInput{
     messageIds: string[];
     userId: string;
     groupId: string;
-}
+};
 
 export interface ReadMessagePayload{
     messageIds: string[];
-}
+};
 
 export interface MessageReadUpdate{
     messageIds: string[];
     userId: string;
     readAt: Date;
-}
+    senderIds: string[];
+};
+
+export type MessageDeliveryUpdate = {
+    messageIds: string[];
+    userId: string;
+    senderIds: string[];
+};
+
+export interface MarkMessageDeliveredInput {
+    messageIds: string[];
+    userId: string;
+    groupId: string;
+};

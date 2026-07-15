@@ -93,8 +93,14 @@
                 });
 
                 socket.on("connect", () => {
+
+                    const token = document.getElementById("token").value;
+
+                    currentUserId = parseJwt(token).id;
+
                     log("✅ Connected");
                     log("Socket Id: " + socket.id);
+
                 });
 
                 socket.on("connect_error", (error) => {
@@ -114,6 +120,27 @@
                     console.log(message);
 
                     unreadMessageIds.push(message._id);
+
+                    // Don't acknowledge your own message
+                    if (message.sender === currentUserId) {
+                        return;
+                    }
+
+                    socket.emit(
+                        "message:delivered",
+                        {
+                            groupId: message.group,
+                            messageIds: [message._id]
+                        },
+                        (response) => {
+
+                            console.log("DELIVERY:", response);
+
+                            log(JSON.stringify(response));
+
+                        }
+                    );
+
                 });
 
                 socket.on("message:read:update", (data) => {
@@ -122,6 +149,16 @@
 
                     log(
                         `✅ ${data.userId} read ${data.messageIds.length} message(s)`
+                    );
+
+                });
+
+                socket.on("message:delivery:update", (data) => {
+
+                    console.log("DELIVERY UPDATE", data);
+
+                    log(
+                        `📦 ${data.userId} received ${data.messageIds.length} message(s)`
                     );
 
                 });

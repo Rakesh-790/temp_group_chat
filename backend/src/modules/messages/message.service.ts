@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 import { ensureUserIsMember, getGroupById } from "../groups/group.service";
 import { IMessage, Message } from "./message.model";
-import { CreateMessageInput, MarkMessageReadInput, MessageReadUpdate } from "./message.types";
+import { CreateMessageInput, MarkMessageDeliveredInput, MarkMessageReadInput, MessageDeliveryUpdate, MessageReadUpdate } from "./message.types";
 import { AppError } from "../../utils/AppError";
 
-export const createMessage = async(
+export const createMessage = async (
     input: CreateMessageInput
-) : Promise<IMessage> => {
+): Promise<IMessage> => {
 
     const {
         groupId,
@@ -21,7 +21,7 @@ export const createMessage = async(
 
     ensureUserIsMember(group, senderId);
 
-    if(replyTo){
+    if (replyTo) {
         await ensureMessageExists(replyTo);
     };
 
@@ -74,7 +74,7 @@ export const ensureMessageSender = (
     };
 };
 
-export const hasUserReadMessage = (
+export const hasUserReadMessage = ( // helper method for read receipt.
     message: IMessage,
     userId: string
 ): boolean => {
@@ -85,11 +85,11 @@ export const hasUserReadMessage = (
 
 };
 
-export const markMessageAsRead = async(
+export const markMessageAsRead = async (
     input: MarkMessageReadInput
 ): Promise<MessageReadUpdate> => {
 
-    const { groupId, messageIds, userId} = input;
+    const { groupId, messageIds, userId } = input;
 
     const group = await getGroupById(groupId);
 
@@ -97,16 +97,20 @@ export const markMessageAsRead = async(
 
     const readAt = new Date();
 
-    const updatedMessages: IMessage[] = [];
+    const senderIds = new Set<string>();
 
-    for (const messageId of messageIds){
+    for (const messageId of messageIds) {
         const message = await ensureMessageExists(messageId);
 
-        if(message.group.toString() !== groupId){
+        if (message.group.toString() !== groupId) {
             throw new AppError(
                 "Message does not belong to this group",
                 400
             );
+        };
+
+        if (message.sender.toString() === userId) {
+            continue;
         };
 
         if (hasUserReadMessage(message, userId)) {
@@ -122,14 +126,66 @@ export const markMessageAsRead = async(
                         readAt
                     }
                 }
-            },
-            {
-                new: true
             }
         );
 
-        updatedMessages.push(message);
+        senderIds.add(message.sender.toString());
     };
 
-    return { messageIds, userId, readAt};
+    return { messageIds, userId, readAt, senderIds: [...senderIds] };
+};
+
+export const hasUserReceivedMessage = ( // helper method for delivery status.
+    message: IMessage,
+    userId: string
+): boolean => {
+
+    return message.deliveredTo.some(
+        id => id.toString() === userId
+    );
+};
+
+export const markMessageAsDelivered = async (
+    input: MarkMessageDeliveredInput
+): Promise<MessageDeliveryUpdate> => {
+
+    const { groupId, messageIds, userId } = input;
+
+    const senderIds = new Set<string>();
+
+    const group = await getGroupById(groupId);
+
+    ensureUserIsMember(group, userId);
+
+    for (const messageId of messageIds) {
+        const message = await ensureMessageExists(messageId);
+
+        if (message.group.toString() !== groupId) {
+            throw new AppError(
+                "Message does not belong to this group",
+                400
+            );
+        };
+
+        if (message.sender.toString() === userId) {
+            continue;
+        };
+
+        if (hasUserReceivedMessage(message, userId)) {
+            continue;
+        };
+
+        await Message.findByIdAndUpdate(
+            messageId,
+            {
+                $addToSet: {
+                    deliveredTo: new mongoose.Types.ObjectId(userId)
+                }
+            }
+        );
+
+        senderIds.add(message.sender.toString());
+    };
+
+    return { messageIds, userId, senderIds: [...senderIds] };
 };

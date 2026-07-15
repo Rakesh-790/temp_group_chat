@@ -10,8 +10,6 @@ const fileFilter = (
     cb: multer.FileFilterCallback
 ) : void => {
      
-    console.log(file.mimetype)
-    console.log(file.originalname)
     const allowedMimeTypes = [
         '.jpg',
         '.jpeg',

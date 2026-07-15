@@ -99,8 +99,6 @@ export const uploadAvatar = async (
 
     const oldAvatarKey = user.avatar?.key;
 
-    console.log(oldAvatarKey)
-
     const uploadedAvatar = await uploadAvatarToS3({
         file,
         userId
