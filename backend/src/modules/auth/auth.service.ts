@@ -293,14 +293,14 @@ export const authenticateAccessToken = async (
     return {
         id: user._id.toString(),
         role: user.role,
-        sessionId: session.toString()
+        sessionId: session.sessionId
     };
 }
 
-export const logout = async (sessionId: string) => {
+export const logout = async (sessionId: string) => {    
 
     const session = await sessionModel.findOne({
-        _id: sessionId,
+        sessionId,
         isRevoked: false
     });
 

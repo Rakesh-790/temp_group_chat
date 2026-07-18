@@ -22,9 +22,9 @@ export const authMiddleware = catchAsync(
 
         if (!accessToken) {
             return next(new AppError(
-                    "Authentication Required",
-                    401
-                )
+                "Authentication Required",
+                401
+            )
             );
         };
 

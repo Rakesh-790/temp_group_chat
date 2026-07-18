@@ -1,5 +1,6 @@
 import cookieParser from "cookie-parser";
-import express, { Request, Response } from "express";
+import express from "express";
+import cors from 'cors';
 import { errorMiddleware } from "./middlewares/Error.middleware";
 import authRouter from "./modules/auth/auth.routes";
 import sessionRouter from "./modules/session/session.routes";
@@ -8,6 +9,12 @@ import { groupRouter } from "./modules/groups/group.routes";
 
 export const app = express();
 
+app.use(
+    cors({
+        origin: "http://localhost:5173",
+        credentials: true,
+    })
+);
 app.use(express.json());
 app.use(cookieParser());
 

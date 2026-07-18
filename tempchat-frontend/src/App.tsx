@@ -1,22 +1,21 @@
-import MainLayout from "./components/layout/mainLayout";
-import Dashboard from "./pages/auth/dashboard"
-import Login from "./pages/auth/login"
-import Register from "./pages/auth/register"
-import { Routes, Route } from "react-router-dom";
+import useSession from "./hooks/useSession";
+import AppRouter from "./routes/AppRouter";
+import { useAuthStore } from "./store/auth.store";
 
 function App() {
+  useSession();
 
-  return(
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+  const isLoading = useAuthStore((state) => state.isLoading);
 
-      <Route element={<MainLayout />}>
-        <Route path="/" element={<Dashboard />} />
-      </Route>
-    </Routes>
-  )
-  
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+  return <AppRouter />
+
 }
 
 export default App;
