@@ -16,4 +16,4 @@ groupRouter.delete('/:groupId', authMiddleware, validate(deleteGroupSchema), del
 
 groupRouter.get('/:groupId', getGroupByIdController);
 
-groupRouter.get('/', getAllGroupsController);
+groupRouter.get('/', authMiddleware, getAllGroupsController);

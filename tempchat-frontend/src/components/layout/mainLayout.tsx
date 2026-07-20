@@ -1,21 +1,17 @@
-import { Outlet } from "react-router-dom";
-import Navbar from "./Navbar";
+import LeftRail from "./LeftRail";
 import Sidebar from "./Sidebar";
+import ChatWindow from "../chat/window/ChatWindow";
 
 const MainLayout = () => {
-  return (
-    <div>
-      <Navbar />
+    return (
+        <div className="flex h-screen overflow-hidden bg-[#111b21]">
+            <LeftRail />
 
-      <div>
-        <Sidebar />
+            <Sidebar />
 
-        <main>
-          <Outlet />
-        </main>
-      </div>
-    </div>
-  );
+            <ChatWindow />
+        </div>
+    );
 };
 
 export default MainLayout;

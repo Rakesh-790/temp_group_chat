@@ -252,24 +252,31 @@ export const getGroupById = async (groupId: string) => {
 };
 
 export const getAllGroups = async (
+    userId: string,
     page: number = 1,
     limit: number = 5
 ) => {
 
     const skip = (page - 1) * limit;
 
-    const groups = await groupModel
-        .find()
-        .skip(skip)
-        .limit(limit)
-        .sort({ createdAt: -1 });
+    const filter = {
+        "members.user": userId,
+        isDeleted: false,
+        expiresAt: { $gt: new Date() }
+    };
 
-    const totalGroups = await groupModel.countDocuments();
+    const groups = await groupModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const totalGroups = await groupModel.countDocuments(filter);
 
     return {
         groups,
         totalGroups: totalGroups,
-        hashNextPage: page * limit < totalGroups,
+        hasNextPage: page * limit < totalGroups,
         hasPreviousPage: page > 1
     };
 };

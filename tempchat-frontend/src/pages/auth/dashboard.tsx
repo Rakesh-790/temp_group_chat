@@ -1,67 +1,71 @@
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-hot-toast";
-import { logout, logoutAllDevices } from "../../service/auth.service";
-import { useAuthStore } from "../../store/auth.store";
+import MainLayout from "../../components/layout/MainLayout";
+// import { useNavigate } from "react-router-dom";
+// import { toast } from "react-hot-toast";
+// import { logout, logoutAllDevices } from "../../service/auth.service";
+// import { useAuthStore } from "../../store/auth.store";
 
 const Dashboard = () => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
-    const clearAuth = useAuthStore((state) => state.clearAuth);
+    // const clearAuth = useAuthStore((state) => state.clearAuth);
 
-    const handleLogout = async () => {
-        try {
-            const response = await logout();
+    // const handleLogout = async () => {
+    //     try {
+    //         const response = await logout();
 
-            clearAuth();
+    //         clearAuth();
 
-            toast.success(response.message);
+    //         toast.success(response.message);
 
-            navigate("/login", { replace: true });
-        } catch (error: any) {
-            toast.error(
-                error?.response?.data?.message ?? "Logout failed."
-            );
-        }
-    };
+    //         navigate("/login", { replace: true });
+    //     } catch (error: any) {
+    //         toast.error(
+    //             error?.response?.data?.message ?? "Logout failed."
+    //         );
+    //     }
+    // };
 
-    const handleLogoutAllDevices = async () => {
-        try {
-            const response = await logoutAllDevices();
+    // const handleLogoutAllDevices = async () => {
+    //     try {
+    //         const response = await logoutAllDevices();
 
-            clearAuth();
+    //         clearAuth();
 
-            toast.success(response.message);
+    //         toast.success(response.message);
 
-            navigate("/login", { replace: true });
-        } catch (error: any) {
-            toast.error(
-                error?.response?.data?.message ??
-                    "Logout from all devices failed."
-            );
-        }
-    };
+    //         navigate("/login", { replace: true });
+    //     } catch (error: any) {
+    //         toast.error(
+    //             error?.response?.data?.message ??
+    //                 "Logout from all devices failed."
+    //         );
+    //     }
+    // };
 
-    return (
-        <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-            <h1 className="text-3xl font-bold">
-                TempChat Dashboard
-            </h1>
+    // return (
+    //     <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+    //         <h1 className="text-3xl font-bold">
+    //             TempChat Dashboard
+    //         </h1>
 
-            <button
-                onClick={handleLogout}
-                className="rounded bg-red-500 px-4 py-2 text-white"
-            >
-                Logout
-            </button>
+    //         <button
+    //             onClick={handleLogout}
+    //             className="rounded bg-red-500 px-4 py-2 text-white"
+    //         >
+    //             Logout
+    //         </button>
 
-            <button
-                onClick={handleLogoutAllDevices}
-                className="rounded bg-gray-700 px-4 py-2 text-white"
-            >
-                Logout All Devices
-            </button>
-        </div>
-    );
+    //         <button
+    //             onClick={handleLogoutAllDevices}
+    //             className="rounded bg-gray-700 px-4 py-2 text-white"
+    //         >
+    //             Logout All Devices
+    //         </button>
+    //     </div>
+    // );
+
+
+    return <MainLayout />;
 };
 
 export default Dashboard;

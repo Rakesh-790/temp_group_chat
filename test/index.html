@@ -186,7 +186,7 @@
                     return;
                 }
 
-                socket.emit("room:join", { roomId: "6a55c4bf6a60c589a1024e0f" },
+                socket.emit("room:join", { roomId: "6a5dbf7a92aec90ece26978b" },
                     (response) => {
                         console.log(response);
                     });
@@ -204,7 +204,7 @@
                     return;
                 }
 
-                socket.emit("room:leave", { roomId: "6a55c4bf6a60c589a1024e0f" },
+                socket.emit("room:leave", { roomId: "6a5dbf7a92aec90ece26978b" },
                     (response) => {
                         console.log(response);
                     });
@@ -228,7 +228,7 @@
                 socket.emit(
                     "message:send",
                     {
-                        groupId: "6a55c4bf6a60c589a1024e0f",
+                        groupId: "6a5dbf7a92aec90ece26978b",
                         type: "TEXT",
                         content
                     },
@@ -259,7 +259,7 @@
                 socket.emit(
                     "message:read",
                     {
-                        groupId: "6a55c4bf6a60c589a1024e0f",
+                        groupId: "6a5dbf7a92aec90ece26978b",
                         messageIds: [...unreadMessageIds]
                     },
                     (response) => {

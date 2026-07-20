@@ -189,3 +189,43 @@ export const markMessageAsDelivered = async (
 
     return { messageIds, userId, senderIds: [...senderIds] };
 };
+
+export const getGroupMessages = async(
+    groupId: string,
+    userId: string,
+    page: number = 1,
+    limit: number = 30
+) : Promise<{
+    messages: IMessage[];
+    hasNextPage: boolean;
+}> => {
+
+    const group = await getGroupById(groupId);
+
+    ensureUserIsMember(group, userId);
+
+    const skip = (page -1) * limit;
+
+    const messages = await Message.find({
+        group: groupId,
+        deleted: false
+    })
+        .sort({ createddAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate("sender", "username avatar")
+        .populate({
+            path: "replyTo",
+            select: "content sender createdAt"
+        });
+
+    const totalMessages = await Message.countDocuments({
+        group: groupId,
+        deleted: false
+    });
+
+    return{
+        messages: messages.reverse(),
+        hasNextPage: skip + limit < totalMessages
+    };
+};
