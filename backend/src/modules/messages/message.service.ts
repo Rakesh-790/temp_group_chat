@@ -23,9 +23,9 @@ export const createMessage = async (
 
     if (replyTo) {
         await ensureMessageExists(replyTo);
-    };
+    }
 
-    const message = await Message.create({
+    await Message.create({
         group: group._id,
         sender: senderId,
         type,
@@ -33,6 +33,25 @@ export const createMessage = async (
         attachments,
         replyTo
     });
+
+    const message = await Message.findOne()
+        .sort({ createdAt: 1 })
+        .populate("sender", "username avatar")
+        .populate({
+            path: "replyTo",
+            select: "content sender createdAt",
+            populate: {
+                path: "sender",
+                select: "username avatar"
+            }
+        });
+
+    if (!message) {
+        throw new AppError(
+            "Failed to create message.",
+            500
+        );
+    }
 
     return message;
 };

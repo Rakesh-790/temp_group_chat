@@ -45,7 +45,7 @@ export const logout =
 export const logoutAllDevices =
     async (): Promise<MessageResponse> => {
         const response = await api.post<MessageResponse>(
-            "/auth/logout-all"
+            "/auth/logoutAll"
         );
 
         return response.data;

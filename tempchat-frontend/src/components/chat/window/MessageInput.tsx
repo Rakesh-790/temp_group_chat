@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Paperclip, SendHorizontal, Smile } from "lucide-react";
+import { useChatStore } from "../../../store/chat.store";
+import { sendMessage } from "../../../service/socket.service";
 
 const MAX_HEIGHT = 140;
 
 const MessageInput = () => {
     const [message, setMessage] = useState("");
+    const { selectedChat } = useChatStore();
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -21,14 +24,18 @@ const MessageInput = () => {
         )}px`;
     }, [message]);
 
-    const sendMessage = () => {
+    const handleSendMessage = async () => {
         const value = message.trim();
-
-        if (!value) return;
-
-        console.log(value);
-
-        setMessage("");
+    
+        if (!value || !selectedChat) return;
+    
+        try {
+            await sendMessage(selectedChat._id, value);
+    
+            setMessage("");
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const handleKeyDown = (
@@ -40,7 +47,7 @@ const MessageInput = () => {
 
         event.preventDefault();
 
-        sendMessage();
+        handleSendMessage();
     };
 
     return (
@@ -103,7 +110,7 @@ const MessageInput = () => {
 
                 {/* Send */}
                 <button
-                    onClick={sendMessage}
+                    onClick={handleSendMessage}
                     disabled={!message.trim()}
                     className="
                         mb-2

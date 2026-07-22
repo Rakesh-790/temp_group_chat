@@ -11,6 +11,7 @@ import CreateGroupModal from "../group/CreateGroupModal";
 import JoinGroupModal from "../group/JoinGroupModal";
 import type { CreatedGroup } from "../../types/group.types";
 import GroupInviteModal from "../group/GroupInviteModal";
+import LogoutModal from "../auth/LogoutModal";
 
 const LeftRail = () => {
 
@@ -18,6 +19,7 @@ const LeftRail = () => {
     const [isJoinGroupOpen, setIsJoinGroupOpen] = useState(false);
     const [createdGroup, setCreatedGroup] = useState<CreatedGroup | null>(null);
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
     const handleGroupCreated = (group: CreatedGroup) => {
         setCreatedGroup(group);
@@ -66,7 +68,9 @@ const LeftRail = () => {
                         <Settings size={22} />
                     </RailButton>
 
-                    <RailButton>
+                    <RailButton
+                        onClick={() => setIsLogoutModalOpen(true)}
+                    >
                         <LogOut size={22} />
                     </RailButton>
                 </div>
@@ -90,6 +94,11 @@ const LeftRail = () => {
             <JoinGroupModal
                 isOpen={isJoinGroupOpen}
                 onClose={() => setIsJoinGroupOpen(false)}
+            />
+
+            <LogoutModal
+                isOpen={isLogoutModalOpen}
+                onClose={() => setIsLogoutModalOpen(false)}
             />
         </>
     );
