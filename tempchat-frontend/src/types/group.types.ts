@@ -6,11 +6,50 @@ export interface Group {
     expiresAt: string;
     createdAt: string;
     updatedAt: string;
-}
+};
 
 export interface GroupsResponse {
     groups: Group[];
     totalGroups: number;
     hasNextPage: boolean;
     hasPreviousPage: boolean;
-}
+};
+
+export interface CreateGroupRequest {
+    name: string;
+    description?: string;
+    duration: number;
+};
+
+export interface CreatedGroup {
+    id: string;
+    name: string;
+    owner: {
+        _id: string;
+        username: string;
+    };
+    inviteCode: string;
+    expiresAt: string;
+};
+
+export interface CreateGroupResponse {
+    success: boolean;
+    message: string;
+    group: CreatedGroup;
+};
+
+export interface JoinGroupRequest {
+    inviteCode: string;
+};
+
+export interface JoinedGroup {
+    id: string;
+    name: string;
+    expiresAt: string;
+};
+
+export interface JoinGroupResponse {
+    success: boolean;
+    message: string;
+    group: JoinedGroup;
+};
