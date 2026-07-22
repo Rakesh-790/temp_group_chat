@@ -25,13 +25,7 @@ const ChatList = () => {
             {groups?.map((group) => (
                 <ChatItem
                     key={group._id}
-                    chat={{
-                        id: group._id,
-                        name: group.name,
-                        lastMessage: "",
-                        time: "",
-                        unreadCount: 0,
-                    }}
+                    group={group}
                 />
             ))}
         </div>

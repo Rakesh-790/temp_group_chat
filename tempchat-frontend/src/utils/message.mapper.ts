@@ -9,14 +9,6 @@ export const mapMessage = (
 
     const isMine = apiMessage.sender._id === currentUser?.id;
 
-    console.log("Current User:", currentUser);
-    console.log("Sender:", apiMessage.sender);
-    console.log(
-        "Comparison:",
-        apiMessage.sender._id,
-        currentUser?.id
-    );
-
     let status: Message["status"] = "sent";
 
     if (apiMessage.readBy.length > 0) {

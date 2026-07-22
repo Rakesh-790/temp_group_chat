@@ -1,5 +1,5 @@
 import api from "../api/axios";
-import type { CreateGroupRequest, CreateGroupResponse, Group, GroupsResponse, JoinGroupRequest, JoinGroupResponse } from "../types/group.types";
+import type { CreateGroupRequest, CreateGroupResponse, DeleteGroupResponse, Group, GroupsResponse, JoinGroupRequest, JoinGroupResponse } from "../types/group.types";
 
 export const getGroups = async (): Promise<Group[]> => {
     const response = await api.get<{ groups: GroupsResponse }>("/groups");
@@ -23,6 +23,16 @@ export const joinGroup = async (
     const response = await api.post<JoinGroupResponse>(
         "/groups/join",
         data
+    );
+
+    return response.data;
+};
+
+export const deleteGroup = async (
+    groupId: string
+): Promise<DeleteGroupResponse> => {
+    const response = await api.delete<DeleteGroupResponse>(
+        `groups/${groupId}`
     );
 
     return response.data;

@@ -1,12 +1,12 @@
 import { useChatStore } from "../../store/chat.store";
-import type { Chat } from "../../types/chat.types";
+import type { Group } from "../../types/group.types";
 
 
 interface ChatItemProps {
-    chat: Chat;
+    group : Group;
 }
 
-const ChatItem = ({ chat }: ChatItemProps) => {
+const ChatItem = ({ group }: ChatItemProps) => {
     const selectedChat = useChatStore(
         (state) => state.selectedChat
     );
@@ -15,11 +15,11 @@ const ChatItem = ({ chat }: ChatItemProps) => {
         (state) => state.selectChat
     );
 
-    const isSelected = selectedChat?.id === chat.id;
+    const isSelected = selectedChat?._id === group._id;
 
     return (
         <button
-            onClick={() => selectChat({id: chat.id, name: chat.name})}
+            onClick={() => selectChat(group)}
             className={`flex w-full items-center gap-3 border-b border-[#202c33] px-4 py-3 text-left transition ${
                 isSelected
                     ? "bg-[#2a3942]"
@@ -28,30 +28,24 @@ const ChatItem = ({ chat }: ChatItemProps) => {
         >
             {/* Avatar */}
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#54656f] font-semibold text-white">
-                {chat.name.charAt(0)}
+                {group.name.charAt(0)}
             </div>
 
             <div className="min-w-0 flex-1">
                 <div className="flex justify-between">
                     <h3 className="truncate font-medium text-white">
-                        {chat.name}
+                        {group.name}
                     </h3>
 
                     <span className="text-xs text-[#8696a0]">
-                        {chat.time}
+                        {/* time */}
                     </span>
                 </div>
 
                 <div className="mt-1 flex justify-between">
                     <p className="truncate text-sm text-[#8696a0]">
-                        {chat.lastMessage}
+                        No message yet
                     </p>
-
-                    {chat.unreadCount > 0 && (
-                        <span className="ml-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#00a884] px-1 text-xs text-white">
-                            {chat.unreadCount}
-                        </span>
-                    )}
                 </div>
             </div>
         </button>

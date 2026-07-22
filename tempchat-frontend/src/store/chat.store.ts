@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { Group } from "../types/group.types";
 
 export interface SelectedChat {
     id: string;
@@ -6,9 +7,9 @@ export interface SelectedChat {
 }
 
 interface ChatStore {
-    selectedChat: SelectedChat | null;
+    selectedChat: Group | null;
 
-    selectChat: (chat: SelectedChat) => void;
+    selectChat: (chat: Group) => void;
 
     clearSelectedChat: () => void;
 }

@@ -17,7 +17,7 @@ const MessageList = () => {
         data,
         isPending,
         error,
-    } = useMessages(selectedChat?.id ?? null);
+    } = useMessages(selectedChat?._id ?? null);
 
     const messages = useMemo(() => {
         return data?.messages.map(mapMessage) ?? [];

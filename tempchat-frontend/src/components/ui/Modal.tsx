@@ -46,18 +46,20 @@ const Modal = ({
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-[#2a3942] px-5 py-4">
-                    <h2 className="text-lg font-semibold text-white">
-                        {title}
-                    </h2>
+                {title && (
+                    <div className="flex items-center justify-between border-b border-[#2a3942] px-5 py-4">
+                        <h2 className="text-lg font-semibold text-white">
+                            {title}
+                        </h2>
 
-                    <button
-                        onClick={onClose}
-                        className="rounded-lg p-2 text-[#8696a0] transition hover:bg-[#2a3942] hover:text-white"
-                    >
-                        <X size={20} />
-                    </button>
-                </div>
+                        <button
+                            onClick={onClose}
+                            className="rounded-lg p-2 text-[#8696a0] transition hover:bg-[#2a3942] hover:text-white"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+                )}
 
                 {/* Body */}
                 <div className="p-5">

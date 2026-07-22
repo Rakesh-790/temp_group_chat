@@ -1,9 +1,24 @@
+export interface GroupMember {
+    user: string;
+    role: "OWNER" | "ADMIN" | "MEMBER";
+    joinedAt: string;
+};
+
 export interface Group {
     _id: string;
     name: string;
     description?: string;
+
+    owner: string;
+    members: GroupMember[];
+
     inviteCode: string;
+
     expiresAt: string;
+
+    isDeleted: boolean;
+    deletedAt: string | null;
+
     createdAt: string;
     updatedAt: string;
 };
@@ -52,4 +67,14 @@ export interface JoinGroupResponse {
     success: boolean;
     message: string;
     group: JoinedGroup;
+};
+
+export interface DeleteGroupResponse {
+    success: boolean;
+    message: string;
+    group: {
+        groupId: string;
+        name: string;
+        deletedAt: string;
+    };
 };
