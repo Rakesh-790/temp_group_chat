@@ -20,12 +20,7 @@ const MessageList = () => {
     } = useMessages(selectedChat?._id ?? null);
 
     const messages = useMemo(() => {
-        return (
-            data?.messages
-                .slice()
-                .reverse()
-                .map(mapMessage) ?? []
-        );
+        return data?.messages.map(mapMessage) ?? [];
     }, [data]);
 
     useEffect(() => {

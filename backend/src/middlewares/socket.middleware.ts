@@ -3,95 +3,93 @@ import { AppError } from "../utils/AppError";
 import cookie from 'cookie';
 import { authenticateAccessToken } from "../modules/auth/auth.service";
 
-// export const socketAuthMiddleware = async (
-//     socket: Socket,
-//     next: (err?: Error) => void
-// ): Promise<void> => {
-
-//     try {
-//         const cookieHeader = socket.handshake.headers.cookie;
-
-//         let accessToken: string | undefined;
-
-//         if (!cookieHeader) {
-//             return next(
-//                 new AppError(
-//                     'Authentication Required',
-//                     401
-//                 )
-//             );
-//         };
-
-//         const cookies = cookie.parse(cookieHeader);
-//         accessToken = cookies.accessToken;
-
-//         // const accessToken = cookies.accessToken;
-
-//         if (!accessToken) {
-//             return next(
-//                 new AppError(
-//                     'Authentication Required',
-//                     401
-//                 )
-//             );
-//         };
-
-//         const authenticatedUser = await authenticateAccessToken(accessToken);
-
-//         console.log("Socket Connected: ", socket.id);
-
-//         socket.data.user = authenticatedUser;
-
-//         next();
-
-//     } catch (error) {
-//         next(error as Error);
-//     }
-
-// };
-
 export const socketAuthMiddleware = async (
     socket: Socket,
     next: (err?: Error) => void
 ): Promise<void> => {
 
     try {
+        const cookieHeader = socket.handshake.headers.cookie;
 
         let accessToken: string | undefined;
 
-        const cookieHeader = socket.handshake.headers.cookie;
+        if (!cookieHeader) {
+            return next(
+                new AppError(
+                    'Authentication Required',
+                    401
+                )
+            );  
+        };
 
-        if (cookieHeader) {
-            const cookies = cookie.parseCookie(cookieHeader);
-            accessToken = cookies.accessToken;
-        }
-
-        if (!accessToken) {
-            accessToken = socket.handshake.auth.accessToken;
-        }
+        const cookies = cookie.parseCookie(cookieHeader);
+        accessToken = cookies.accessToken;
 
         if (!accessToken) {
             return next(
                 new AppError(
-                    "Authentication Required",
+                    'Authentication Required',
                     401
                 )
             );
-        }
+        };
 
-        const authenticatedUser = await authenticateAccessToken(
-            accessToken
-        );
+        const authenticatedUser = await authenticateAccessToken(accessToken);
 
-        // 5. Store authenticated user on socket
+        console.log("Socket Connected: ", socket.id);
+
         socket.data.user = authenticatedUser;
 
         next();
 
     } catch (error) {
-
         next(error as Error);
-
     }
 
 };
+
+// export const socketAuthMiddleware = async (
+//     socket: Socket,
+//     next: (err?: Error) => void
+// ): Promise<void> => {
+
+//     try {
+
+//         let accessToken: string | undefined;
+
+//         const cookieHeader = socket.handshake.headers.cookie;
+
+//         if (cookieHeader) {
+//             const cookies = cookie.parseCookie(cookieHeader);
+//             accessToken = cookies.accessToken;
+//         }
+
+//         if (!accessToken) {
+//             accessToken = socket.handshake.auth.accessToken;
+//         }
+
+//         if (!accessToken) {
+//             return next(
+//                 new AppError(
+//                     "Authentication Required",
+//                     401
+//                 )
+//             );
+//         }
+
+//         const authenticatedUser = await authenticateAccessToken(
+//             accessToken
+//         );
+
+//         // 5. Store authenticated user on socket
+//         socket.data.user = authenticatedUser;
+
+//         next();
+
+//     } catch (error) {
+
+//         next(error as Error);
+
+//     }
+
+// };

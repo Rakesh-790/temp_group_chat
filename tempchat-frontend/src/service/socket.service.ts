@@ -2,25 +2,46 @@ import { socket } from "../api/socket";
 import { MessageType } from "../types/message.types";
 
 export const connectSocket = () => {
+    console.log("connectSocket called", {
+        connected: socket.connected,
+        id: socket.id,
+    });
+
     if (!socket.connected) {
+        console.log("Calling socket.connect()");
         socket.connect();
     }
 };
 
 export const disconnectSocket = () => {
+    console.log("disconnectSocket called", {
+        connected: socket.connected,
+        id: socket.id,
+    });
+
     if (socket.connected) {
         socket.disconnect();
     }
 };
 
 export const joinRoom = (groupId: string) => {
-    console.log("Joining room:", groupId);
-    socket.emit("room:join", groupId);
+    socket.emit(
+        "room:join",
+        { roomId: groupId },
+        (response: any) => {
+            console.log("Join room response:", response);
+        }
+    );
 };
 
 export const leaveRoom = (groupId: string) => {
-    console.log("Leaving room:", groupId);
-    socket.emit("room:leave", groupId);
+    socket.emit(
+        "room:leave",
+        { roomId: groupId },
+        (response: any) => {
+            console.log("Leave room response:", response);
+        }
+    );
 };
 
 export const sendMessage = (

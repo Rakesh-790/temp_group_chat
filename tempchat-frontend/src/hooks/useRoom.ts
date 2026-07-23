@@ -20,5 +20,11 @@ export const useRoom = () => {
 
         joinRoom(currentRoom);
         previousRoom.current = currentRoom;
+
+        return () => {
+            if (previousRoom.current) {
+                leaveRoom(previousRoom.current);
+            }
+        };
     }, [selectedChat]);
 };

@@ -4,10 +4,9 @@ import { useAuthStore } from "../store/auth.store";
 export const mapMessage = (
     apiMessage: ApiMessage
 ): Message => {
-
     const currentUser = useAuthStore.getState().user;
 
-    const isMine = apiMessage.sender._id === currentUser?.id;
+    const isMine = apiMessage.sender._id === currentUser?.id; 
 
     let status: Message["status"] = "sent";
 
@@ -24,11 +23,13 @@ export const mapMessage = (
 
         senderName: apiMessage.sender.username,
 
-        content: apiMessage.content,
+        senderAvatar: apiMessage.sender.avatar,
 
-        createdAt: new Date(
-            apiMessage.createdAt
-        ).toLocaleTimeString([], {
+        type: apiMessage.type,
+
+        content: apiMessage.content ?? "",
+
+        createdAt: new Date(apiMessage.createdAt).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
         }),
@@ -37,12 +38,29 @@ export const mapMessage = (
 
         status,
 
-        edited: false,
+        edited: apiMessage.edited,
 
-        attachments: [],
+        editedAt: apiMessage.editedAt ?? undefined,
+
+        replyTo: apiMessage.replyTo
+            ? {
+                  id: apiMessage.replyTo._id,
+                  senderName: apiMessage.replyTo.sender.username,
+                  content: apiMessage.replyTo.content,
+              }
+            : null,
+
+        attachments: apiMessage.attachments.map((attachment, index) => ({
+            id: `${apiMessage._id}-${index}`,
+            url: attachment.url,
+            fileName: attachment.fileName,
+            type: attachment.mimeType.startsWith("image/")
+                ? "image"
+                : attachment.mimeType.startsWith("video/")
+                ? "video"
+                : "file",
+        })),
 
         reactions: [],
-
-        replyTo: null,
     };
-};
+}

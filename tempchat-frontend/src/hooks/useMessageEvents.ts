@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { ApiMessage, GetMessagesResponse } from "../types/message.types";
+import type { ApiMessage, GetMessagesResponse} from "../types/message.types";
 import { socket } from "../api/socket";
 
 export const useMessageEvents = () => {
@@ -18,7 +18,6 @@ export const useMessageEvents = () => {
                         };
                     }
 
-                    // Prevent duplicate messages
                     const exists = oldData.messages.some(
                         (m) => m._id === message._id
                     );

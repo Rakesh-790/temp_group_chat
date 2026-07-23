@@ -94,8 +94,8 @@ const MessageInput = () => {
                     onKeyDown={handleKeyDown}
                     placeholder="Type a message"
                     className="
-                        max-h-[140px]
-                        min-h-[44px]
+                        max-h-35
+                        min-h-11
                         flex-1
                         resize-none
                         overflow-y-auto

@@ -4,7 +4,7 @@ import SidebarHeader from "../chat/SidebarHeader";
 
 const Sidebar = () => {
   return (
-      <aside className="w-[380px] border-r border-[#2a3942] bg-[#111b21]">
+      <aside className="w-95 border-r border-[#2a3942] bg-[#111b21]">
           <SidebarHeader/>
 
           <SearchBox/>

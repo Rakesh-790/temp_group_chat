@@ -25,25 +25,24 @@ export const createMessage = async (
         await ensureMessageExists(replyTo);
     }
 
-    await Message.create({
+    const createdMessage = await Message.create({
         group: group._id,
         sender: senderId,
         type,
         content,
         attachments,
-        replyTo
+        replyTo,
     });
 
-    const message = await Message.findOne()
-        .sort({ createdAt: 1 })
+    const message = await Message.findById(createdMessage._id)
         .populate("sender", "username avatar")
         .populate({
             path: "replyTo",
             select: "content sender createdAt",
             populate: {
                 path: "sender",
-                select: "username avatar"
-            }
+                select: "username avatar",
+            },
         });
 
     if (!message) {
@@ -209,12 +208,12 @@ export const markMessageAsDelivered = async (
     return { messageIds, userId, senderIds: [...senderIds] };
 };
 
-export const getGroupMessages = async(
+export const getGroupMessages = async (
     groupId: string,
     userId: string,
     page: number = 1,
     limit: number = 30
-) : Promise<{
+): Promise<{
     messages: IMessage[];
     hasNextPage: boolean;
 }> => {
@@ -223,7 +222,7 @@ export const getGroupMessages = async(
 
     ensureUserIsMember(group, userId);
 
-    const skip = (page -1) * limit;
+    const skip = (page - 1) * limit;
 
     const messages = await Message.find({
         group: groupId,
@@ -243,7 +242,7 @@ export const getGroupMessages = async(
         deleted: false
     });
 
-    return{
+    return {
         messages: messages.reverse(),
         hasNextPage: skip + limit < totalMessages
     };
