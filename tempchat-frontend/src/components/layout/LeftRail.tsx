@@ -1,8 +1,6 @@
 import {
     MessageCircle,
-    Users,
     Plus,
-    Settings,
     LogOut,
     UserPlus,
 } from "lucide-react";
@@ -12,6 +10,8 @@ import JoinGroupModal from "../group/JoinGroupModal";
 import type { CreatedGroup } from "../../types/group.types";
 import GroupInviteModal from "../group/GroupInviteModal";
 import LogoutModal from "../auth/LogoutModal";
+import { useUIStore } from "../../store/ui.store";
+import { useProfile } from "../../hooks/useProfile";
 
 const LeftRail = () => {
 
@@ -20,6 +20,10 @@ const LeftRail = () => {
     const [createdGroup, setCreatedGroup] = useState<CreatedGroup | null>(null);
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
+    const { activePanel, setActivePanel } = useUIStore();
+
+    const { data: profile } = useProfile();
 
     const handleGroupCreated = (group: CreatedGroup) => {
         setCreatedGroup(group);
@@ -33,20 +37,30 @@ const LeftRail = () => {
                 {/* Top Section */}
                 <div className="flex flex-col items-center gap-6">
                     {/* Avatar */}
-                    <button className="flex h-12 w-12 items-center justify-center rounded-full bg-[#54656f] text-lg font-semibold text-white transition hover:bg-[#6a7a84]">
-                        R
+                    <button
+                        className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-[#54656f]"
+                        onClick={() => setActivePanel("profile")}
+                    >
+                        {profile?.avatar?.url ? (
+                            <img
+                                src={profile.avatar.url}
+                                alt={profile.username}
+                                className="h-full w-full object-cover"
+                            />
+                        ) : (
+                            <span className="text-lg font-semibold text-white">
+                                {profile?.username?.charAt(0).toUpperCase() ?? "R"}
+                            </span>
+                        )}
                     </button>
-
                     {/* Navigation */}
                     <nav className="flex flex-col items-center gap-3">
-                        <RailButton active>
+                        <RailButton
+                            active={activePanel === "chats"}
+                            onClick={() => setActivePanel("chats")}
+                        >
                             <MessageCircle size={22} />
                         </RailButton>
-
-                        <RailButton>
-                            <Users size={22} />
-                        </RailButton>
-
                         <RailButton
                             onClick={() => setIsCreateGroupOpen(true)}
                         >
@@ -64,10 +78,6 @@ const LeftRail = () => {
 
                 {/* Bottom Section */}
                 <div className="flex flex-col items-center gap-3">
-                    <RailButton>
-                        <Settings size={22} />
-                    </RailButton>
-
                     <RailButton
                         onClick={() => setIsLogoutModalOpen(true)}
                     >

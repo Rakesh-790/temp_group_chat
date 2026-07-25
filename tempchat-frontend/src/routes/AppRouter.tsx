@@ -3,6 +3,7 @@ import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import Dashboard from "../pages/auth/Dashboard";
 import ProtectedRoute from "../components/auth/ProtectedRoutes";
+import ProfilePage from "../pages/profile/ProfilePanel";
 
 const AppRouter = () => {
     return (
@@ -14,6 +15,7 @@ const AppRouter = () => {
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
                 <Route path="/" element={<Dashboard />} />
+                <Route path="/profile" element={<ProfilePage />} />
             </Route>
         </Routes>
     );
