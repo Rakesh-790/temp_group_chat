@@ -267,6 +267,7 @@ export const getAllGroups = async (
 
     const groups = await groupModel
         .find(filter)
+        .populate("members.user", "username avatar")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);

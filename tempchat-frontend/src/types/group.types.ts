@@ -1,5 +1,11 @@
+export interface GroupUser {
+    _id: string;
+    username: string;
+    avatar?: string;
+};
+
 export interface GroupMember {
-    user: string;
+    user: GroupUser;
     role: "OWNER" | "ADMIN" | "MEMBER";
     joinedAt: string;
 };

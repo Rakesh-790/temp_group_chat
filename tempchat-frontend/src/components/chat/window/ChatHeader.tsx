@@ -38,6 +38,10 @@ const ChatHeader = ({ chat }: ChatHeaderProps) => {
 
     const isOwner = chat.owner === user?.id;
 
+    const memberNames = chat.members
+        .map((member) => member.user.username)
+        .join(", ");
+
     return (
         <>
             <header className="flex h-16 items-center justify-between border-b border-[#2a3942] bg-[#202c33] px-5">
@@ -51,9 +55,13 @@ const ChatHeader = ({ chat }: ChatHeaderProps) => {
                             {chat.name}
                         </h2>
 
-                        <p className="text-xs text-[#8696a0]">
-                            Loading...
-                        </p>
+                        {memberNames ? (
+                            <p className="truncate text-xs text-[#8696a0]">
+                                {memberNames}
+                            </p>
+                        ) : (
+                            <div className="mt-1 h-3 w-36 animate-pulse rounded bg-[#2a3942]" />
+                        )}
                     </div>
                 </div>
 
