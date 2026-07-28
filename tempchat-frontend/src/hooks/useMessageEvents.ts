@@ -8,9 +8,11 @@ export const useMessageEvents = () => {
 
     useEffect(() => {
         const handleNewMessage = (message: ApiMessage) => {
+            console.log("Socket message:", message);
             queryClient.setQueryData<GetMessagesResponse>(
                 ["messages", message.group],
                 (oldData) => {
+                    console.log("Old data:", oldData);
                     if (!oldData) {
                         return {
                             messages: [message],

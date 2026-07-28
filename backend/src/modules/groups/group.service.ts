@@ -1,8 +1,9 @@
 import crypto from 'crypto';
-import groupModel, { IGroup } from './group.model';
+import groupModel, { IGroup, IGroupMember } from './group.model';
 import { AppError } from '../../utils/AppError';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { addDeleteGroupJob } from '../../jobs/queues/deleteGroup.queues';
+import { Message } from '../messages/message.model';
 
 interface CreateGroupData {
     name: string,
@@ -229,6 +230,15 @@ export const softDeleteGroup = async (
 
     await group.save();
 
+    const deleteAt = new Date(
+        Date.now() + 7 * 24 * 60 * 60 * 1000
+    );
+
+    await addDeleteGroupJob(
+        group.id,
+        deleteAt
+    );
+
     return {
         groupId: group.id,
         name: group.name,
@@ -242,7 +252,16 @@ export const getGroupById = async (groupId: string) => {
         throw new AppError('Invalid group id', 400);
     }
 
-    const group = await groupModel.findById(groupId);
+    const group = await groupModel
+        .findById(groupId)
+        .populate(
+            "owner",
+            "avatar username bio"
+        )
+        .populate(
+            "members.user",
+            "username avatar bio"
+        );
 
     if (!group) {
         throw new AppError('Group not found', 404);
@@ -267,6 +286,7 @@ export const getAllGroups = async (
 
     const groups = await groupModel
         .find(filter)
+        .populate("owner", "username avatar bio")
         .populate("members.user", "username avatar")
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -292,6 +312,10 @@ export const deleteExpiredGroup = async (
         return;
     }
 
+    await Message.deleteMany({
+        group: group._id,
+    });
+
     await group.deleteOne();
 
     console.log(`Group with ${groupId} deleted successfully.`);
@@ -303,7 +327,7 @@ export const ensureUserIsMember = (
 ): void => {
 
     const isMember = group.members.some(
-        member => member.user.toString() === userId
+        (member) => getMemberUserId(member) === userId
     );
 
     if (!isMember) {
@@ -311,7 +335,7 @@ export const ensureUserIsMember = (
             "User is not a member of this group",
             403
         );
-    };
+    }
 };
 
 export const ensureUserIsNotMember = (
@@ -320,7 +344,7 @@ export const ensureUserIsNotMember = (
 ): void => {
 
     const isMember = group.members.some(
-        member => member.user.toString() === userId
+        (member) => getMemberUserId(member) === userId
     );
 
     if (isMember) {
@@ -329,5 +353,13 @@ export const ensureUserIsNotMember = (
             400
         );
     }
+};
 
+// Helper function.
+const getMemberUserId = (member: IGroupMember): string => {
+    const user = member.user as any;
+
+    return user._id
+        ? user._id.toString()
+        : user.toString();
 };

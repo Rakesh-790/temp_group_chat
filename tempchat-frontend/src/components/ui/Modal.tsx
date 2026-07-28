@@ -6,6 +6,7 @@ interface ModalProps {
     onClose: () => void;
     title: string;
     children: ReactNode;
+    className?: string;
 }
 
 const Modal = ({
@@ -13,6 +14,7 @@ const Modal = ({
     onClose,
     title,
     children,
+    className = "max-w-md",
 }: ModalProps) => {
 
     useEffect(() => {
@@ -42,7 +44,7 @@ const Modal = ({
             onClick={onClose}
         >
             <div
-                className="w-full max-w-md rounded-xl bg-[#202c33] shadow-xl"
+                className={`flex max-h-[90vh] w-full flex-col rounded-xl bg-[#202c33] shadow-xl ${className}`}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
@@ -62,7 +64,7 @@ const Modal = ({
                 )}
 
                 {/* Body */}
-                <div className="p-5">
+                <div className="flex-1 overflow-y-auto p-5">
                     {children}
                 </div>
             </div>

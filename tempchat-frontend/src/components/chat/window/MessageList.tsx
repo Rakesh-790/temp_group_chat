@@ -22,6 +22,8 @@ const MessageList = () => {
     const messages = useMemo(() => {
         return data?.messages.map(mapMessage) ?? [];
     }, [data]);
+    console.log("Rendered messages:", messages.length);
+console.log(messages);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({

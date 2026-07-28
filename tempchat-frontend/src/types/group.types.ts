@@ -1,8 +1,13 @@
 export interface GroupUser {
     _id: string;
     username: string;
-    avatar?: string;
-};
+    bio: string;
+
+    avatar: {
+        url: string | null;
+        key?: string | null;
+    };
+}
 
 export interface GroupMember {
     user: GroupUser;
@@ -15,7 +20,7 @@ export interface Group {
     name: string;
     description?: string;
 
-    owner: string;
+    owner: GroupUser;
     members: GroupMember[];
 
     inviteCode: string;

@@ -228,7 +228,7 @@ export const getGroupMessages = async (
         group: groupId,
         deleted: false
     })
-        .sort({ createddAt: -1 })
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .populate("sender", "username avatar")

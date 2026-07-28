@@ -7,15 +7,22 @@ export const deleteGroupQueue = new Queue("delete-group", {
 
 export const addDeleteGroupJob = async (
     groupId: string,
-    expiresAt: Date
+    deleteAt: Date
 ) => {
 
-    const delay = expiresAt.getTime() - Date.now();
+    const delay = deleteAt.getTime() - Date.now();
+
+    const existingJob = await deleteGroupQueue.getJob(groupId);
+
+    if (existingJob) {
+        await existingJob.remove();
+    };
 
     await deleteGroupQueue.add(
         "delete-expired-group",
         { groupId },
         {
+            jobId: groupId,
             delay,
             removeOnComplete: true,
             removeOnFail: false

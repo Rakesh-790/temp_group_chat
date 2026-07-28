@@ -2,6 +2,7 @@ import { MoreVertical } from "lucide-react";
 import type { Group } from "../../../types/group.types";
 import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "../../../store/auth.store";
+import GroupInfoModal from "../../group/GroupInfoModal";
 import DeleteGroupModal from "../../group/DeleteGroupModal";
 
 interface ChatHeaderProps {
@@ -13,6 +14,7 @@ const ChatHeader = ({ chat }: ChatHeaderProps) => {
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isGroupInfoOpen, setIsGroupInfoOpen] = useState(false);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -36,7 +38,7 @@ const ChatHeader = ({ chat }: ChatHeaderProps) => {
 
     const user = useAuthStore((state) => state.user);
 
-    const isOwner = chat.owner === user?.id;
+    const isOwner = chat.owner._id === user?.id;
 
     const memberNames = chat.members
         .map((member) => member.user.username)
@@ -76,21 +78,45 @@ const ChatHeader = ({ chat }: ChatHeaderProps) => {
                         <MoreVertical size={20} />
                     </button>
 
-                    {isMenuOpen && isOwner && (
-                        <div className="absolute right-0 mt-3 w-48 rounded-lg border border-[#2a3942] bg-[#202c33] shadow-lg">
+                    {isMenuOpen && (
+                        <div className="absolute right-0 mt-3 w-52 rounded-lg border border-[#2a3942] bg-[#202c33] shadow-lg">
+
                             <button
                                 onClick={() => {
                                     setIsMenuOpen(false);
-                                    setIsDeleteModalOpen(true);
+                                    setIsGroupInfoOpen(true);
                                 }}
-                                className="w-full px-4 py-3 text-left text-red-400 transition hover:bg-[#2a3942]"
+                                className="w-full px-4 py-3 text-left text-white transition hover:bg-[#2a3942]"
                             >
-                                Delete Group
+                                Group Info
                             </button>
+
+                            {isOwner && (
+                                <>
+                                    <div className="mx-2 border-t border-[#2a3942]" />
+
+                                    <button
+                                        onClick={() => {
+                                            setIsMenuOpen(false);
+                                            setIsDeleteModalOpen(true);
+                                        }}
+                                        className="w-full px-4 py-3 text-left text-red-400 transition hover:bg-[#2a3942]"
+                                    >
+                                        Delete Group
+                                    </button>
+                                </>
+                            )}
+
                         </div>
                     )}
                 </div>
             </header>
+
+            <GroupInfoModal
+                isOpen={isGroupInfoOpen}
+                onClose={() => setIsGroupInfoOpen(false)}
+                group={chat}
+            />
 
             <DeleteGroupModal
                 isOpen={isDeleteModalOpen}
