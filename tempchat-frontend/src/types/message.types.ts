@@ -1,3 +1,6 @@
+import type { SystemEvent } from "./system-event.types";
+
+
 export const MessageType = {
     TEXT: "TEXT",
     IMAGE: "IMAGE",
@@ -47,6 +50,8 @@ export interface ApiMessage {
 
     content: string | null;
 
+    systemEvent: SystemEvent | null;
+
     attachments: Attachment[];
 
     replyTo: ReplyMessage | null;
@@ -80,6 +85,8 @@ export interface Message {
     type: MessageType;
 
     content: string;
+
+    systemEvent: SystemEvent | null;
 
     createdAt: string;
 

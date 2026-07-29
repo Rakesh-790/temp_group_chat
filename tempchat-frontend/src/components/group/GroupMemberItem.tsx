@@ -1,7 +1,11 @@
+import { useAssignRole } from "../../hooks/useAssignRole";
 import type { GroupMember } from "../../types/group.types";
+import MemberActionMenu from "./MemberActionMenu";
 
 interface GroupMemberItemProps {
+    groupId: string;
     member: GroupMember;
+    showActions?: boolean;
 }
 
 const roleStyles = {
@@ -10,7 +14,29 @@ const roleStyles = {
     MEMBER: "bg-[#202c33] text-[#8696a0] border border-[#2a3942]",
 };
 
-const GroupMemberItem = ({ member }: GroupMemberItemProps) => {
+const GroupMemberItem = ({
+    groupId,
+    member,
+    showActions = false,
+}: GroupMemberItemProps) => {
+    const assignRoleMutation = useAssignRole();
+
+    const handlePromote = () => {
+        assignRoleMutation.mutate({
+            groupId,
+            userId: member.user._id,
+            role: "ADMIN",
+        });
+    };
+
+    const handleDemote = () => {
+        assignRoleMutation.mutate({
+            groupId,
+            userId: member.user._id,
+            role: "MEMBER",
+        });
+    };
+
     return (
         <div className="flex items-center justify-between rounded-xl px-4 py-3 transition-all duration-200 hover:bg-[#202c33]">
             <div className="flex items-center gap-4">
@@ -40,11 +66,22 @@ const GroupMemberItem = ({ member }: GroupMemberItemProps) => {
             </div>
 
             {/* Role Badge */}
-            <span
-                className={`rounded-full px-3 py-1 text-xs font-medium ${roleStyles[member.role]}`}
-            >
-                {member.role}
-            </span>
+            <div className="flex items-center gap-2">
+                <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${roleStyles[member.role]}`}
+                >
+                    {member.role}
+                </span>
+
+                {showActions && (
+                    <MemberActionMenu
+                        role={member.role}
+                        loading={assignRoleMutation.isPending}
+                        onPromote={handlePromote}
+                        onDemote={handleDemote}
+                    />
+                )}
+            </div>
         </div>
     );
 };

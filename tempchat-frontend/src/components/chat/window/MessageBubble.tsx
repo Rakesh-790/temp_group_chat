@@ -6,6 +6,9 @@ interface MessageBubbleProps {
 }
 
 const MessageBubble = ({ message }: MessageBubbleProps) => {
+    if (message.type === "SYSTEM") {
+        return null;
+    };
     const renderStatus = () => {
         if (!message.isMine) return null;
 

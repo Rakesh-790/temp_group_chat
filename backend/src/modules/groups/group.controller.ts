@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { AuthRequest } from "../auth/auth.types";
 import { assignRole, createGroup, getAllGroups, getGroupById, joinGroup, softDeleteGroup } from "./group.service";
+import { emitNewMessage } from "../../socket/emitter/socket.emitter";
 
 
 export const createTempGroup = catchAsync(
@@ -74,6 +75,11 @@ export const assignMemberRole = catchAsync(
             req.user!.id,
             userId,
             role
+        );
+
+        emitNewMessage(
+            result.groupId,
+            result.systemMessage
         );
 
         return res.status(200).json({

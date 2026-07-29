@@ -29,6 +29,8 @@ export const mapMessage = (
 
         content: apiMessage.content ?? "",
 
+        systemEvent: apiMessage.systemEvent,
+
         createdAt: new Date(apiMessage.createdAt).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",

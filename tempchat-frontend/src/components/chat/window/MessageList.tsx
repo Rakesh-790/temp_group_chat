@@ -4,6 +4,7 @@ import { mapMessage } from "../../../utils/message.mapper";
 import MessageBubble from "./MessageBubble";
 import DateSeparator from "./DateSeparator";
 import { useMessages } from "../../../hooks/useMessage";
+import SystemMessage from "../SystemMessage";
 
 const MessageList = () => {
 
@@ -23,7 +24,7 @@ const MessageList = () => {
         return data?.messages.map(mapMessage) ?? [];
     }, [data]);
     console.log("Rendered messages:", messages.length);
-console.log(messages);
+    console.log(messages);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({
@@ -54,12 +55,19 @@ console.log(messages);
 
                 <DateSeparator label="Today" />
 
-                {messages.map((message) => (
-                    <MessageBubble
-                        key={message.id}
-                        message={message}
-                    />
-                ))}
+                {messages.map((message) =>
+                    message.type === "SYSTEM" ? (
+                        <SystemMessage
+                            key={message.id}
+                            message={message}
+                        />
+                    ) : (
+                        <MessageBubble
+                            key={message.id}
+                            message={message}
+                        />
+                    )
+                )}
 
                 <div ref={bottomRef} />
 

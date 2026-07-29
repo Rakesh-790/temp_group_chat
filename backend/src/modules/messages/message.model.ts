@@ -8,6 +8,28 @@ export enum MessageType {
     SYSTEM = "SYSTEM"
 };
 
+export enum SystemAction {
+    ROLE_CHANGED = "ROLE_CHANGED",
+
+    MEMBER_JOINED = "MEMBER_JOINED",
+
+    MEMBER_LEFT = "MEMBER_LEFT",
+
+    MEMBER_REMOVED = "MEMBER_REMOVED",
+
+    GROUP_CREATED = "GROUP_CREATED",
+
+    GROUP_RENAMED = "GROUP_RENAMED",
+
+    GROUP_DESCRIPTION_UPDATED = "GROUP_DESCRIPTION_UPDATED",
+
+    OWNER_TRANSFERRED = "OWNER_TRANSFERRED",
+
+    GROUP_EXPIRED = "GROUP_EXPIRED",
+
+    GROUP_DELETED = "GROUP_DELETED",
+};
+
 const attachmentSchema = new Schema(
     {
         url: {
@@ -53,6 +75,24 @@ const readReceiptSchema = new Schema(
     }
 );
 
+const systemEventSchema = new Schema(
+    {
+        action: {
+            type: String,
+            enum: Object.values(SystemAction),
+            required: true,
+        },
+
+        metadata: {
+            type: Schema.Types.Mixed,
+            default: {},
+        },
+    },
+    {
+        _id: false,
+    }
+);
+
 const messageSchema = new Schema(
     {
         group: {
@@ -76,6 +116,10 @@ const messageSchema = new Schema(
             type: String,
             trim: true,
             default: null
+        },
+        systemEvent: {
+            type: systemEventSchema,
+            default: null,
         },
         attachments: {
             type: [attachmentSchema],

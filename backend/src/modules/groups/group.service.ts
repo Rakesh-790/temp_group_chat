@@ -3,7 +3,8 @@ import groupModel, { IGroup, IGroupMember } from './group.model';
 import { AppError } from '../../utils/AppError';
 import mongoose, { Types } from 'mongoose';
 import { addDeleteGroupJob } from '../../jobs/queues/deleteGroup.queues';
-import { Message } from '../messages/message.model';
+import { Message, SystemAction } from '../messages/message.model';
+import { createSystemMessage } from '../messages/system-message.service';
 
 interface CreateGroupData {
     name: string,
@@ -206,12 +207,32 @@ export const assignRole = async (
         );
     };
 
+    const systemMessage = await createSystemMessage({
+        groupId,
+        senderId: requesterId,
+        event: {
+            action: SystemAction.ROLE_CHANGED,
+            metadata: {
+                targetUserId,
+                previousRole,
+                newRole: role,
+            },
+        },
+    });
+
+    const updatedGroup = await groupModel
+    .findById(groupId)
+    .populate("owner", "username avatar bio")
+    .populate("members.user", "username avatar bio");
+
     return {
         groupId,
         targetUserId,
         requesterId,
         previousRole,
         newRole: role,
+        systemMessage,
+        group: updatedGroup
     };
 };
 

@@ -37,3 +37,25 @@ export const deleteGroup = async (
 
     return response.data;
 };
+
+export interface AssignRoleRequest {
+    groupId: string;
+    userId: string;
+    role: "ADMIN" | "MEMBER";
+};
+
+export const assignRole = async ({
+    groupId,
+    userId,
+    role,
+}: AssignRoleRequest) => {
+    const response = await api.patch(
+        `/groups/${groupId}/role`,
+        {
+            userId,
+            role,
+        }
+    );
+
+    return response.data.data;
+};

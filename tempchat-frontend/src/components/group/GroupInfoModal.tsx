@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import Modal from "../ui/Modal";
 import GroupMemberItem from "./GroupMemberItem";
 import type { Group } from "../../types/group.types";
+import { useAuthStore } from "../../store/auth.store";
 
 interface GroupInfoModalProps {
     isOpen: boolean;
@@ -17,6 +18,14 @@ const GroupInfoModal = ({
     group,
 }: GroupInfoModalProps) => {
     if (!group) return null;
+
+    const { user } = useAuthStore();
+
+    const myMember = group.members.find(
+        member => member.user._id === user?.id
+    );
+
+    const myRole = myMember?.role;
 
     const handleCopyInviteCode = async () => {
         try {
@@ -123,7 +132,7 @@ const GroupInfoModal = ({
 
                 </section>
 
-                {/*  MEMBERS  */}
+                {/* MEMBERS */}
 
                 <section className="rounded-xl bg-[#111b21]">
 
@@ -137,14 +146,20 @@ const GroupInfoModal = ({
 
                     <div className="max-h-85 overflow-y-auto py-2">
 
-                        {group.members.map((member) => (
+                        {group.members.map((member) => {
+                            const showActions =
+                                myRole === "OWNER" &&
+                                member.role !== "OWNER";
 
-                            <GroupMemberItem
-                                key={member.user._id}
-                                member={member}
-                            />
-
-                        ))}
+                            return (
+                                <GroupMemberItem
+                                    key={member.user._id}
+                                    groupId={group._id}
+                                    member={member}
+                                    showActions={showActions}
+                                />
+                            );
+                        })}
 
                     </div>
 
