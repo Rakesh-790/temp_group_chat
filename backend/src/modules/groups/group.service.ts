@@ -112,7 +112,14 @@ export const assignRole = async (
     role: 'OWNER' | 'ADMIN' | 'MEMBER'
 ) => {
 
-    const group = await groupModel.findById(groupId);
+    const group = await groupModel
+    .findById(groupId)
+    .select({
+        owner: 1,
+        members: 1,
+        expiresAt: 1,
+        isDeleted: 1,
+    });
 
     if (!group) {
         throw new AppError(
@@ -178,14 +185,33 @@ export const assignRole = async (
 
     };
 
-    member.role = role;
+    const previousRole = member.role;
 
-    await group.save();
+    const result = await groupModel.updateOne(
+        {
+            _id: groupId,
+            "members.user": targetUserId,
+        },
+        {
+            $set: {
+                "members.$.role": role,
+            },
+        }
+    );
+
+    if (result.matchedCount === 0) {
+        throw new AppError(
+            "Failed to update member role",
+            409
+        );
+    };
 
     return {
-        groupId: group.id,
-        userId: targetUserId,
-        role
+        groupId,
+        targetUserId,
+        requesterId,
+        previousRole,
+        newRole: role,
     };
 };
 
