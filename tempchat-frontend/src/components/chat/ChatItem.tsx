@@ -3,7 +3,7 @@ import type { Group } from "../../types/group.types";
 
 
 interface ChatItemProps {
-    group : Group;
+    group: Group;
 }
 
 const ChatItem = ({ group }: ChatItemProps) => {
@@ -20,11 +20,10 @@ const ChatItem = ({ group }: ChatItemProps) => {
     return (
         <button
             onClick={() => selectChat(group)}
-            className={`flex w-full items-center gap-3 border-b border-[#202c33] px-4 py-3 text-left transition ${
-                isSelected
+            className={`flex w-full items-center gap-3 border-b border-[#202c33] px-4 py-3 text-left transition ${isSelected
                     ? "bg-[#2a3942]"
                     : "hover:bg-[#202c33]"
-            }`}
+                }`}
         >
             {/* Avatar */}
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#54656f] font-semibold text-white">
@@ -44,7 +43,14 @@ const ChatItem = ({ group }: ChatItemProps) => {
 
                 <div className="mt-1 flex justify-between">
                     <p className="truncate text-sm text-[#8696a0]">
-                        No message yet
+                        {group.lastMessage ? (
+                            <>
+                                {group.lastMessage.sender.username}:{" "}
+                                {group.lastMessage.content}
+                            </>
+                        ) : (
+                            "No message yet"
+                        )}
                     </p>
                 </div>
             </div>

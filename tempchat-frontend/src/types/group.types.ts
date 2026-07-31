@@ -7,7 +7,19 @@ export interface GroupUser {
         url: string | null;
         key?: string | null;
     };
-}
+};
+
+export interface LastMessage {
+    _id: string;
+    content: string | null;
+
+    sender: {
+        _id: string;
+        username: string;
+    };
+
+    createdAt: string;
+};
 
 export interface GroupMember {
     user: GroupUser;
@@ -32,6 +44,8 @@ export interface Group {
 
     createdAt: string;
     updatedAt: string;
+
+    lastMessage: LastMessage | null;
 };
 
 export interface GroupsResponse {

@@ -334,15 +334,31 @@ export const getAllGroups = async (
     const groups = await groupModel
         .find(filter)
         .populate("owner", "username avatar bio")
-        .populate("members.user", "username avatar")
+        .populate("members.user", "username avatar bio")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
 
+    const groupWithLastMessage = await Promise.all(
+        groups.map(async(group) => {
+            const lastMessage = await Message.findOne({
+                group: group._id,
+                deleted: false
+            })
+            .sort({ createdAt: -1 })
+            .populate("sender", "username");
+
+            return{
+                ...group.toObject(),
+                lastMessage
+            };
+        })
+    );
+
     const totalGroups = await groupModel.countDocuments(filter);
 
     return {
-        groups,
+        groups : groupWithLastMessage,
         totalGroups: totalGroups,
         hasNextPage: page * limit < totalGroups,
         hasPreviousPage: page > 1

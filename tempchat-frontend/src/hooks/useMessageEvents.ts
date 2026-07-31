@@ -1,13 +1,16 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { ApiMessage, GetMessagesResponse} from "../types/message.types";
 import { socket } from "../api/socket";
+import type { ApiMessage, GetMessagesResponse } from "../types/message.types";
+import type { Group } from "../types/group.types";
 
 export const useMessageEvents = () => {
     const queryClient = useQueryClient();
 
     useEffect(() => {
         const handleNewMessage = (message: ApiMessage) => {
+
+            // Update messages cache
             queryClient.setQueryData<GetMessagesResponse>(
                 ["messages", message.group],
                 (oldData) => {
@@ -30,6 +33,30 @@ export const useMessageEvents = () => {
                         ...oldData,
                         messages: [...oldData.messages, message],
                     };
+                }
+            );
+
+            // Update groups cache
+            queryClient.setQueryData<Group[]>(
+                ["groups"],
+                (oldGroups) => {
+                    if (!oldGroups) return oldGroups;
+
+                    return oldGroups.map((group) => {
+                        if (group._id !== message.group) {
+                            return group;
+                        }
+
+                        return {
+                            ...group,
+                            lastMessage: {
+                                _id: message._id,
+                                content: message.content,
+                                sender: message.sender,
+                                createdAt: message.createdAt,
+                            },
+                        };
+                    });
                 }
             );
         };
