@@ -1,71 +1,162 @@
 import { socket } from "../api/socket";
 import { MessageType } from "../types/message.types";
 
-export const connectSocket = () => {
-    console.log("connectSocket called", {
-        connected: socket.connected,
-        id: socket.id,
-    });
-
-    if (!socket.connected) {
-        console.log("Calling socket.connect()");
-        socket.connect();
-    }
+type SocketAck = {
+    success: boolean;
+    message: string;
 };
 
-export const disconnectSocket = () => {
-    console.log("disconnectSocket called", {
-        connected: socket.connected,
-        id: socket.id,
-    });
+type SendMessagePayload = {
+    groupId: string;
+    content: string;
+};
+
+type MarkMessagesDeliveredPayload = {
+    groupId: string;
+    messageIds: string[];
+};
+
+export const connectSocket = (): void => {
+
+    if (!socket.connected) {
+        socket.connect();
+    }
+
+};
+
+export const disconnectSocket = (): void => {
 
     if (socket.connected) {
         socket.disconnect();
     }
+
 };
 
-export const joinRoom = (groupId: string) => {
-    socket.emit(
-        "room:join",
-        { roomId: groupId },
-        (response: any) => {
-            console.log("Join room response:", response);
-        }
-    );
-};
+export const joinRoom = (
+    groupId: string
+): Promise<SocketAck> => {
 
-export const leaveRoom = (groupId: string) => {
-    socket.emit(
-        "room:leave",
-        { roomId: groupId },
-        (response: any) => {
-            console.log("Leave room response:", response);
-        }
-    );
-};
-
-export const sendMessage = (
-    groupId: string,
-    content: string
-): Promise<void> => {
     return new Promise((resolve, reject) => {
+
         socket.emit(
-            "message:send",
-            {
-                groupId,
-                type: MessageType.TEXT,
-                content,
-            },
-            (response: {
-                success: boolean;
-                message: string;
-            }) => {
+            "room:join",
+            { roomId: groupId },
+            (response: SocketAck) => {
+
                 if (response.success) {
-                    resolve();
+                    resolve(response);
                 } else {
                     reject(new Error(response.message));
                 }
+
             }
         );
+
     });
+
+};
+
+export const leaveRoom = (
+    groupId: string
+): Promise<SocketAck> => {
+
+    return new Promise((resolve, reject) => {
+
+        socket.emit(
+            "room:leave",
+            { roomId: groupId },
+            (response: SocketAck) => {
+
+                if (response.success) {
+                    resolve(response);
+                } else {
+                    reject(new Error(response.message));
+                }
+
+            }
+        );
+
+    });
+
+};
+
+export const sendMessage = (
+    payload: SendMessagePayload
+): Promise<SocketAck> => {
+
+    return new Promise((resolve, reject) => {
+
+        socket.emit(
+            "message:send",
+            {
+                groupId: payload.groupId,
+                type: MessageType.TEXT,
+                content: payload.content,
+            },
+            (response: SocketAck) => {
+
+                if (response.success) {
+                    resolve(response);
+                } else {
+                    reject(new Error(response.message));
+                }
+
+            }
+        );
+
+    });
+
+};
+
+export const markMessagesDelivered = (
+    payload: MarkMessagesDeliveredPayload
+): Promise<SocketAck> => {
+
+    return new Promise((resolve, reject) => {
+
+        socket.emit(
+            "message:delivered",
+            payload,
+            (response: SocketAck) => {
+
+                if (response.success) {
+                    resolve(response);
+                } else {
+                    reject(new Error(response.message));
+                }
+
+            }
+        );
+
+    });
+
+};
+
+type MarkMessagesReadPayload = {
+    groupId: string;
+    messageIds: string[];
+};
+
+export const markMessagesRead = (
+    payload: MarkMessagesReadPayload
+): Promise<SocketAck> => {
+
+    return new Promise((resolve, reject) => {
+
+        socket.emit(
+            "message:read",
+            payload,
+            (response: SocketAck) => {
+
+                if (response.success) {
+                    resolve(response);
+                } else {
+                    reject(new Error(response.message));
+                }
+
+            }
+        );
+
+    });
+
 };

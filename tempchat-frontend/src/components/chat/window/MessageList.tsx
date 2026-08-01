@@ -5,6 +5,8 @@ import MessageBubble from "./MessageBubble";
 import DateSeparator from "./DateSeparator";
 import { useMessages } from "../../../hooks/useMessage";
 import SystemMessage from "../SystemMessage";
+import { useDeliveryReceipt } from "../../../hooks/useDeliveryRecipt";
+import { useReadReceipt } from "../../../hooks/useReadReceipt";
 
 const MessageList = () => {
 
@@ -14,11 +16,17 @@ const MessageList = () => {
         (state) => state.selectedChat
     );
 
-    const {
-        data,
-        isPending,
-        error,
-    } = useMessages(selectedChat?._id ?? null);
+    const { data, isPending, error } = useMessages(selectedChat?._id ?? null);
+    
+    useDeliveryReceipt(
+        selectedChat?._id ?? null,
+        data?.messages ?? []
+    );
+
+    useReadReceipt(
+        selectedChat?._id ?? null,
+        data?.messages ?? []
+    );
 
     const messages = useMemo(() => {
         return data?.messages.map(mapMessage) ?? [];

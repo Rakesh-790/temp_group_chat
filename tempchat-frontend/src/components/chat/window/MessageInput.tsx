@@ -25,17 +25,25 @@ const MessageInput = () => {
     }, [message]);
 
     const handleSendMessage = async () => {
-        const value = message.trim();
-    
-        if (!value || !selectedChat) return;
-    
+
+        const content = message.trim();
+
+        if (!content || !selectedChat) {
+            return;
+        };
+
         try {
-            await sendMessage(selectedChat._id, value);
-    
+            await sendMessage({
+                groupId: selectedChat._id,
+                content,
+            });
+
             setMessage("");
+
         } catch (error) {
             console.error(error);
-        }
+        };
+
     };
 
     const handleKeyDown = (

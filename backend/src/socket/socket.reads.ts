@@ -20,34 +20,25 @@ export const registerReadHandlers = (
             const result = await markMessageAsRead({
                 groupId: data.groupId,
                 messageIds: data.messageIds,
-                userId
+                userId,
             });
 
-            // io.to(data.groupId).emit(
-            //     "message:read:update",
-            //     result
-            // );
+            for (const senderId of result.senderIds) {
 
-            if (result.senderIds.length === 0) {
-                callback?.({
-                    success: false,
-                    message: "No new messages were marked as read."
-                });
-                return;
-            };
-
-            for (const senderId of result.senderIds){
                 socketManager.emitToUser(
                     senderId,
                     "message:read:update",
                     result
                 );
-            };
+
+            }
 
             callback?.({
                 success: true,
-                message: "Messages marked as read successfully"
+                message: "Messages marked as read successfully.",
             });
+
         })
     );
+
 };

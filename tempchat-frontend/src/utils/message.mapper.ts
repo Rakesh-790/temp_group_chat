@@ -4,16 +4,23 @@ import { useAuthStore } from "../store/auth.store";
 export const mapMessage = (
     apiMessage: ApiMessage
 ): Message => {
+
     const currentUser = useAuthStore.getState().user;
 
-    const isMine = apiMessage.sender._id === currentUser?.id; 
+    const currentUserId = currentUser?.id ?? "";
+
+    const isMine = apiMessage.sender._id === currentUserId;
 
     let status: Message["status"] = "sent";
 
-    if (apiMessage.readBy.length > 0) {
-        status = "read";
-    } else if (apiMessage.deliveredTo.length > 0) {
-        status = "delivered";
+    if (isMine) {
+
+        if (apiMessage.readBy.length > 0) {
+            status = "read";
+        } else if (apiMessage.deliveredTo.length > 0) {
+            status = "delivered";
+        }
+
     }
 
     return {
@@ -65,4 +72,4 @@ export const mapMessage = (
 
         reactions: [],
     };
-}
+};

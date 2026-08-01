@@ -79,7 +79,7 @@ const ChatHeader = ({ chat }: ChatHeaderProps) => {
                     </button>
 
                     {isMenuOpen && (
-                        <div className="absolute right-0 mt-3 w-52 rounded-lg border border-[#2a3942] bg-[#202c33] shadow-lg">
+                        <div className="absolute right-0 top-full z-50 mt-2 w-52 rounded-lg border border-[#2a3942] bg-[#202c33] shadow-xl">
 
                             <button
                                 onClick={() => {

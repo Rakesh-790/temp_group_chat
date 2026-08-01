@@ -113,44 +113,61 @@ export const markMessageAsRead = async (
 
     ensureUserIsMember(group, userId);
 
+    const messages = await Message.find({
+        _id: { $in: messageIds },
+        group: groupId,
+    });
+
+    if (messages.length !== messageIds.length) {
+        throw new AppError(
+            "One or more messages were not found.",
+            404
+        );
+    }
+
     const readAt = new Date();
 
     const senderIds = new Set<string>();
+    const updatedMessageIds: string[] = [];
 
-    for (const messageId of messageIds) {
-        const message = await ensureMessageExists(messageId);
-
-        if (message.group.toString() !== groupId) {
-            throw new AppError(
-                "Message does not belong to this group",
-                400
-            );
-        };
+    for (const message of messages) {
 
         if (message.sender.toString() === userId) {
             continue;
-        };
+        }
 
         if (hasUserReadMessage(message, userId)) {
             continue;
-        };
+        }
 
-        await Message.findByIdAndUpdate(
-            messageId,
+        senderIds.add(message.sender.toString());
+        updatedMessageIds.push(message._id.toString());
+    }
+
+    if (updatedMessageIds.length > 0) {
+
+        await Message.updateMany(
+            {
+                _id: { $in: updatedMessageIds }
+            },
             {
                 $push: {
                     readBy: {
                         user: new mongoose.Types.ObjectId(userId),
-                        readAt
-                    }
-                }
+                        readAt,
+                    },
+                },
             }
         );
 
-        senderIds.add(message.sender.toString());
-    };
+    }
 
-    return { messageIds, userId, readAt, senderIds: [...senderIds] };
+    return {
+        messageIds: updatedMessageIds,
+        userId,
+        readAt,
+        senderIds: [...senderIds],
+    };
 };
 
 export const hasUserReceivedMessage = ( // helper method for delivery status.
@@ -169,43 +186,59 @@ export const markMessageAsDelivered = async (
 
     const { groupId, messageIds, userId } = input;
 
-    const senderIds = new Set<string>();
-
     const group = await getGroupById(groupId);
 
     ensureUserIsMember(group, userId);
 
-    for (const messageId of messageIds) {
-        const message = await ensureMessageExists(messageId);
+    const messages = await Message.find({
+        _id: { $in: messageIds },
+        group: groupId,
+    });
 
-        if (message.group.toString() !== groupId) {
-            throw new AppError(
-                "Message does not belong to this group",
-                400
-            );
-        };
+    if (messages.length !== messageIds.length) {
+        throw new AppError(
+            "One or more messages were not found.",
+            404
+        );
+    }
+
+    const senderIds = new Set<string>();
+    const updatedMessageIds: string[] = [];
+
+    for (const message of messages) {
 
         if (message.sender.toString() === userId) {
             continue;
-        };
+        }
 
         if (hasUserReceivedMessage(message, userId)) {
             continue;
-        };
+        }
 
-        await Message.findByIdAndUpdate(
-            messageId,
+        senderIds.add(message.sender.toString());
+        updatedMessageIds.push(message._id.toString());
+    }
+
+    if (updatedMessageIds.length > 0) {
+
+        await Message.updateMany(
+            {
+                _id: { $in: updatedMessageIds },
+            },
             {
                 $addToSet: {
-                    deliveredTo: new mongoose.Types.ObjectId(userId)
-                }
+                    deliveredTo: new mongoose.Types.ObjectId(userId),
+                },
             }
         );
 
-        senderIds.add(message.sender.toString());
-    };
+    }
 
-    return { messageIds, userId, senderIds: [...senderIds] };
+    return {
+        messageIds: updatedMessageIds,
+        userId,
+        senderIds: [...senderIds],
+    };
 };
 
 export const getGroupMessages = async (

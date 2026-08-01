@@ -1,6 +1,5 @@
 import type { SystemEvent } from "./system-event.types";
 
-
 export const MessageType = {
     TEXT: "TEXT",
     IMAGE: "IMAGE",
@@ -11,6 +10,12 @@ export const MessageType = {
 
 export type MessageType =
     (typeof MessageType)[keyof typeof MessageType];
+
+export type MessageStatus =
+    | "sending"
+    | "sent"
+    | "delivered"
+    | "read";
 
 export interface Attachment {
     url: string;
@@ -73,6 +78,24 @@ export interface ApiMessage {
     updatedAt: string;
 }
 
+export interface MessageAttachment {
+    id: string;
+    url: string;
+    type: "image" | "video" | "file";
+    fileName: string;
+}
+
+export interface MessageReaction {
+    emoji: string;
+    count: number;
+}
+
+export interface MessageReply {
+    id: string;
+    senderName: string;
+    content: string;
+}
+
 export interface Message {
     id: string;
 
@@ -92,32 +115,33 @@ export interface Message {
 
     isMine: boolean;
 
-    status: "sending" | "sent" | "delivered" | "read";
+    status: MessageStatus;
 
     edited: boolean;
 
     editedAt?: string;
 
-    replyTo?: {
-        id: string;
-        senderName: string;
-        content: string;
-    } | null;
+    replyTo: MessageReply | null;
 
-    attachments?: {
-        id: string;
-        url: string;
-        type: "image" | "video" | "file";
-        fileName: string;
-    }[];
+    attachments: MessageAttachment[];
 
-    reactions?: {
-        emoji: string;
-        count: number;
-    }[];
+    reactions: MessageReaction[];
 }
 
 export interface GetMessagesResponse {
     messages: ApiMessage[];
     hasNextPage: boolean;
+}
+
+export interface MessageDeliveryUpdate {
+    messageIds: string[];
+    userId: string;
+    senderIds: string[];
+}
+
+export interface MessageReadUpdate {
+    messageIds: string[];
+    userId: string;
+    readAt: string;
+    senderIds: string[];
 }
