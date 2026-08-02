@@ -2,7 +2,8 @@ import type { ApiMessage, Message } from "../types/message.types";
 import { useAuthStore } from "../store/auth.store";
 
 export const mapMessage = (
-    apiMessage: ApiMessage
+    apiMessage: ApiMessage,
+    recipientCount: number
 ): Message => {
 
     const currentUser = useAuthStore.getState().user;
@@ -15,12 +16,15 @@ export const mapMessage = (
 
     if (isMine) {
 
-        if (apiMessage.readBy.length > 0) {
+        if (
+            recipientCount > 0 &&
+            apiMessage.readBy.length === recipientCount
+        ) {
             status = "read";
         } else if (apiMessage.deliveredTo.length > 0) {
             status = "delivered";
         }
-
+    
     }
 
     return {

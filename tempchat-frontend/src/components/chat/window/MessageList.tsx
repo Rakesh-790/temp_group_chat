@@ -16,6 +16,10 @@ const MessageList = () => {
         (state) => state.selectedChat
     );
 
+    const recipientCount = selectedChat
+    ? selectedChat.members.length - 1
+    : 0;
+
     const { data, isPending, error } = useMessages(selectedChat?._id ?? null);
     
     useDeliveryReceipt(
@@ -29,10 +33,12 @@ const MessageList = () => {
     );
 
     const messages = useMemo(() => {
-        return data?.messages.map(mapMessage) ?? [];
-    }, [data]);
-    console.log("Rendered messages:", messages.length);
-    console.log(messages);
+        return (
+            data?.messages.map((message) =>
+                mapMessage(message, recipientCount)
+            ) ?? []
+        );
+    }, [data, recipientCount]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({
