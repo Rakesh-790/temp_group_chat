@@ -1,4 +1,5 @@
 import { useMessageEvents } from "./hooks/useMessageEvents";
+import { usePresence } from "./hooks/usePresence";
 import { useRoom } from "./hooks/useRoom";
 import useSession from "./hooks/useSession";
 import { useSocket } from "./hooks/useSocket";
@@ -9,6 +10,8 @@ function App() {
   useSession();
 
   useSocket();
+
+  usePresence();
 
   useRoom();
 

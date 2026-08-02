@@ -7,6 +7,9 @@ export interface GroupUser {
         url: string | null;
         key?: string | null;
     };
+
+    isOnline: boolean;
+    lastSeen: string | null;
 };
 
 export interface LastMessage {

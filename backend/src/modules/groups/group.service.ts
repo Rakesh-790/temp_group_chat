@@ -114,13 +114,13 @@ export const assignRole = async (
 ) => {
 
     const group = await groupModel
-    .findById(groupId)
-    .select({
-        owner: 1,
-        members: 1,
-        expiresAt: 1,
-        isDeleted: 1,
-    });
+        .findById(groupId)
+        .select({
+            owner: 1,
+            members: 1,
+            expiresAt: 1,
+            isDeleted: 1,
+        });
 
     if (!group) {
         throw new AppError(
@@ -221,9 +221,9 @@ export const assignRole = async (
     });
 
     const updatedGroup = await groupModel
-    .findById(groupId)
-    .populate("owner", "username avatar bio")
-    .populate("members.user", "username avatar bio");
+        .findById(groupId)
+        .populate("owner", "username avatar bio isOnline lastSeen")
+        .populate("members.user", "username avatar bio isOnline lastSeen");
 
     return {
         groupId,
@@ -303,11 +303,11 @@ export const getGroupById = async (groupId: string) => {
         .findById(groupId)
         .populate(
             "owner",
-            "avatar username bio"
+            "avatar username bio isOnline lastSeen"
         )
         .populate(
             "members.user",
-            "username avatar bio"
+            "username avatar bio isOnline lastSeen"
         );
 
     if (!group) {
@@ -333,22 +333,22 @@ export const getAllGroups = async (
 
     const groups = await groupModel
         .find(filter)
-        .populate("owner", "username avatar bio")
-        .populate("members.user", "username avatar bio")
+        .populate("owner", "username avatar bio isOnline lastSeen")
+        .populate("members.user", "username avatar bio isOnline lastSeen")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
 
     const groupWithLastMessage = await Promise.all(
-        groups.map(async(group) => {
+        groups.map(async (group) => {
             const lastMessage = await Message.findOne({
                 group: group._id,
                 deleted: false
             })
-            .sort({ createdAt: -1 })
-            .populate("sender", "username");
+                .sort({ createdAt: -1 })
+                .populate("sender", "username");
 
-            return{
+            return {
                 ...group.toObject(),
                 lastMessage
             };
@@ -358,7 +358,7 @@ export const getAllGroups = async (
     const totalGroups = await groupModel.countDocuments(filter);
 
     return {
-        groups : groupWithLastMessage,
+        groups: groupWithLastMessage,
         totalGroups: totalGroups,
         hasNextPage: page * limit < totalGroups,
         hasPreviousPage: page > 1
@@ -425,4 +425,32 @@ const getMemberUserId = (member: IGroupMember): string => {
     return user._id
         ? user._id.toString()
         : user.toString();
+};
+
+export const getGroupMemberIds = async (
+    userId: string
+): Promise<string[]> => {
+
+    const groups = await groupModel
+        .find({
+            "members.user": userId,
+            isDeleted: false,
+            expiresAt: {
+                $gt: new Date()
+            }
+        })
+        .select("members.user")
+        .lean();
+
+    const memberIds = new Set<string>();
+
+    for (const group of groups) {
+        for (const member of group.members) {
+            const memberId = member.user.toString();
+
+            memberIds.add(memberId);
+        }
+    }
+
+    return Array.from(memberIds);
 };

@@ -187,7 +187,7 @@ export const getAllUsers = async (
         users,
         totalUsers: totalUsers,
         hasNextPage: page * limit < totalUsers,
-        hasPreviousPage : page > 1
+        hasPreviousPage: page > 1
     };
 };
 
@@ -212,9 +212,9 @@ export const getUserPresence = async (
     };
 };
 
-export const markUserOnline = async(
+export const markUserOnline = async (
     userId: string
-) : Promise<void> => {
+) => {
 
     const user = await userModel.findByIdAndUpdate(
         userId,
@@ -222,39 +222,51 @@ export const markUserOnline = async(
             isOnline: true
         },
         {
-            new: true
+            new: true,
+            select: "isOnline lastSeen"
         }
     );
 
     if (!user) {
         throw new AppError(
-            'User Not Found',
+            "User Not Found",
             404
         );
-    };
+    }
 
+    return {
+        isOnline: user.isOnline,
+        lastSeen: user.lastSeen
+    };
 };
 
-export const markUserOffline = async(
+export const markUserOffline = async (
     userId: string
-) : Promise<void> => {
+) => {
+
+    const lastSeen = new Date();
 
     const user = await userModel.findByIdAndUpdate(
         userId,
         {
             isOnline: false,
-            lastSeen: new Date()
+            lastSeen
         },
         {
-            new: true
+            new: true,
+            select: "isOnline lastSeen"
         }
     );
 
     if (!user) {
         throw new AppError(
-            'User Not Found',
+            "User Not Found",
             404
         );
-    };
+    }
 
+    return {
+        isOnline: user.isOnline,
+        lastSeen: user.lastSeen
+    };
 };

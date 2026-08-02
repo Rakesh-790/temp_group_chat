@@ -3,6 +3,7 @@ import { ensureUserIsMember, getGroupById } from "../groups/group.service";
 import { IMessage, Message } from "./message.model";
 import { CreateMessageInput, MarkMessageDeliveredInput, MarkMessageReadInput, MessageDeliveryUpdate, MessageReadUpdate } from "./message.types";
 import { AppError } from "../../utils/AppError";
+import groupModel from "../groups/group.model";
 
 export const createMessage = async (
     input: CreateMessageInput
@@ -239,6 +240,69 @@ export const markMessageAsDelivered = async (
         userId,
         senderIds: [...senderIds],
     };
+};
+
+export const markPendingMessagesAsDelivered = async (
+    userId: string
+): Promise<MessageDeliveryUpdate[]> => {
+
+    const objectUserId = new mongoose.Types.ObjectId(userId);
+
+    const groups = await groupModel.find({
+        "members.user": objectUserId,
+        isDeleted: false,
+    }).select("_id");
+
+    if (groups.length === 0) {
+        return [];
+    }
+
+    const groupIds = groups.map(group => group._id);
+
+    const messages = await Message.find({
+        group: { $in: groupIds },
+        sender: { $ne: objectUserId },
+        deleted: false,
+        deliveredTo: { $ne: objectUserId },
+    }).select("_id sender");
+
+    if (messages.length === 0) {
+        return [];
+    }
+
+    const messageIds = messages.map(message => message._id);
+
+    await Message.updateMany(
+        {
+            _id: { $in: messageIds },
+        },
+        {
+            $addToSet: {
+                deliveredTo: objectUserId,
+            },
+        }
+    );
+
+    const updates = new Map<string, MessageDeliveryUpdate>();
+
+    for (const message of messages) {
+
+        const senderId = message.sender.toString();
+
+        if (!updates.has(senderId)) {
+            updates.set(senderId, {
+                senderIds: [senderId],
+                userId,
+                messageIds: [],
+            });
+        }
+
+        updates.get(senderId)!.messageIds.push(
+            message._id.toString()
+        );
+    }
+
+    return [...updates.values()];
 };
 
 export const getGroupMessages = async (

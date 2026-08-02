@@ -1,12 +1,11 @@
 import { Server } from "socket.io";
-import { Server as HttpServer } from 'http';
+import { Server as HttpServer } from "http";
 import { registerSocketEvents } from "./socket.event";
 import { CLIENT_URL } from "../config/config";
 import { socketAuthMiddleware } from "../middlewares/socket.middleware";
 import { socketManager } from "./socket.manager";
-import { registerRoomHandlers } from "./socket.room";
 import { handleUserConnected, handleUserDisconnected } from "../modules/presence/user.presence";
-import { registerMessageHandlers } from "./socket.message";
+
 
 let io: Server;
 
@@ -14,14 +13,12 @@ export const initializeSocket = (
     httpServer: HttpServer
 ): Server => {
 
-    io = new Server(httpServer,
-        {
-            cors: {
-                origin: CLIENT_URL,
-                credentials: true
-            }
-        }
-    );
+    io = new Server(httpServer, {
+        cors: {
+            origin: CLIENT_URL,
+            credentials: true,
+        },
+    });
 
     io.use(socketAuthMiddleware);
 
@@ -31,7 +28,7 @@ export const initializeSocket = (
 
             socketManager.registerSocket(userId, socket);
 
-            await handleUserConnected(userId, io);
+            await handleUserConnected(userId);
 
             registerSocketEvents(io, socket);
 
@@ -39,7 +36,7 @@ export const initializeSocket = (
                 try {
                     socketManager.removeSocket(userId, socket);
 
-                    await handleUserDisconnected(userId, io);
+                    await handleUserDisconnected(userId);
 
                     console.log(`Socket Disconnected: ${socket.id} (${reason})`);
                 } catch (error) {
@@ -58,8 +55,8 @@ export const initializeSocket = (
 export const getIo = (): Server => {
 
     if (!io) {
-        throw new Error("Socket.IO is not been initialize");
-    };
+        throw new Error("Socket.IO has not been initialized");
+    }
 
     return io;
 };
