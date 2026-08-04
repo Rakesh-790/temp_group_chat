@@ -6,6 +6,11 @@ export interface IGroupMember {
     joinedAt: Date;
 };
 
+interface IGroupAvatar{
+    url: string | null;
+    key: string | null;
+}
+
 export interface IGroup extends Document {
     name: string;
 
@@ -14,6 +19,8 @@ export interface IGroup extends Document {
     owner: Types.ObjectId;
 
     members: IGroupMember[];
+
+    avatar: IGroupAvatar;
 
     inviteCode: string;
 
@@ -28,7 +35,7 @@ export interface IGroup extends Document {
     updatedAt: Date;
 };
 
-const memeberSchema = new mongoose.Schema<IGroupMember>(
+const memberSchema = new mongoose.Schema<IGroupMember>(
     {
         user: {
             type: mongoose.Schema.Types.ObjectId,
@@ -66,7 +73,19 @@ const groupSchema = new mongoose.Schema<IGroup>(
             ref: 'user',
             required: true
         },
-        members: [memeberSchema],
+        members: [memberSchema],
+
+        avatar: {
+            url: {
+                type: String,
+                default: null
+            },
+            key: {
+                type: String,
+                default: null
+            }
+        },
+        
         inviteCode: {
             type: String,
             required: true,

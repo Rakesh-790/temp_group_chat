@@ -1,16 +1,39 @@
 import crypto from 'crypto';
-import groupModel, { IGroup, IGroupMember } from './group.model';
+import groupModel from './group.model';
 import { AppError } from '../../utils/AppError';
-import mongoose, { Types } from 'mongoose';
+import mongoose from 'mongoose';
 import { addDeleteGroupJob } from '../../jobs/queues/deleteGroup.queues';
 import { Message, SystemAction } from '../messages/message.model';
 import { createSystemMessage } from '../messages/system-message.service';
+import { ensureGroupManager, ensureGroupOwner, ensureUserIsNotMember } from './group.permission';
+import { deleteImageFromS3, uploadImageToS3 } from '../../utils/s3.utils';
 
 interface CreateGroupData {
     name: string,
     description?: string,
     duration: number;
     ownerId: string;
+};
+
+interface UpdateGroupData {
+    name?: string;
+    description?: string;
+};
+
+//helper function to get populated group with owner and members
+const getPopulatedGroup = async (
+    groupId: string
+) => {
+    return groupModel
+        .findById(groupId)
+        .populate(
+            "owner",
+            "username avatar bio isOnline lastSeen"
+        )
+        .populate(
+            "members.user",
+            "username avatar bio isOnline lastSeen"
+        );
 };
 
 export const createGroup = async (
@@ -144,12 +167,7 @@ export const assignRole = async (
         );
     }
 
-    if (group.owner.toString() !== requesterId) {
-        throw new AppError(
-            'Only Owner can assign roles',
-            403
-        );
-    };
+    ensureGroupOwner(group, requesterId);
 
     if (role === 'OWNER') {
         throw new AppError(
@@ -220,10 +238,7 @@ export const assignRole = async (
         },
     });
 
-    const updatedGroup = await groupModel
-        .findById(groupId)
-        .populate("owner", "username avatar bio isOnline lastSeen")
-        .populate("members.user", "username avatar bio isOnline lastSeen");
+    const updatedGroup = await getPopulatedGroup(groupId);
 
     return {
         groupId,
@@ -234,6 +249,117 @@ export const assignRole = async (
         systemMessage,
         group: updatedGroup
     };
+};
+
+export const updateGroup = async (
+    groupId: string,
+    requesterId: string,
+    data: UpdateGroupData
+) => {
+
+    const group = await groupModel.findById(groupId);
+
+    if (!group) {
+        throw new AppError(
+            "Group not found",
+            404
+        );
+    }
+
+    if (group.isDeleted) {
+        throw new AppError(
+            "Group has been deleted",
+            400
+        );
+    }
+
+    if (group.expiresAt < new Date()) {
+        throw new AppError(
+            "Group has expired",
+            400
+        );
+    }
+
+    ensureGroupManager(group, requesterId);
+
+    if (data.name !== undefined) {
+        group.name = data.name;
+    }
+
+    if (data.description !== undefined) {
+        group.description = data.description;
+    }
+
+    await group.save();
+
+    return await getPopulatedGroup(group.id);
+};
+
+export const updateGroupAvatar = async (
+    groupId: string,
+    requesterId: string,
+    file: Express.Multer.File
+) => {
+
+    if (!file) {
+        throw new AppError(
+            "Avatar is required",
+            400
+        );
+    }
+
+    const group = await groupModel.findById(groupId);
+
+    if (!group) {
+        throw new AppError(
+            "Group not found",
+            404
+        );
+    }
+
+    if (group.isDeleted) {
+        throw new AppError(
+            "Group has been deleted",
+            400
+        );
+    }
+
+    if (group.expiresAt < new Date()) {
+        throw new AppError(
+            "Group has expired",
+            400
+        );
+    }
+
+    ensureGroupManager(group, requesterId);
+
+    const oldAvatarKey = group.avatar?.key;
+
+    const uploadedAvatar = await uploadImageToS3({
+        file,
+        folder: "groups",
+        identifier: group.id
+    });
+
+    group.avatar = {
+        key: uploadedAvatar.key,
+        url: uploadedAvatar.url
+    };
+
+    await group.save();
+
+    if (oldAvatarKey) {
+        try {
+            await deleteImageFromS3(oldAvatarKey);
+        } catch (error) {
+            console.error(
+                "Failed to delete old group avatar",
+                error
+            );
+        }
+    }
+
+    return await getPopulatedGroup(group.id);
 };
 
 export const softDeleteGroup = async (
@@ -264,12 +390,7 @@ export const softDeleteGroup = async (
         );
     };
 
-    if (group.owner.toString() !== requesterId) {
-        throw new AppError(
-            'Only Owner can delete the group',
-            403
-        );
-    };
+    ensureGroupOwner(group, requesterId);
 
     group.isDeleted = true;
 
@@ -299,16 +420,7 @@ export const getGroupById = async (groupId: string) => {
         throw new AppError('Invalid group id', 400);
     }
 
-    const group = await groupModel
-        .findById(groupId)
-        .populate(
-            "owner",
-            "avatar username bio isOnline lastSeen"
-        )
-        .populate(
-            "members.user",
-            "username avatar bio isOnline lastSeen"
-        );
+    const group = await getPopulatedGroup(groupId);
 
     if (!group) {
         throw new AppError('Group not found', 404);
@@ -382,49 +494,6 @@ export const deleteExpiredGroup = async (
     await group.deleteOne();
 
     console.log(`Group with ${groupId} deleted successfully.`);
-};
-
-export const ensureUserIsMember = (
-    group: IGroup,
-    userId: string
-): void => {
-
-    const isMember = group.members.some(
-        (member) => getMemberUserId(member) === userId
-    );
-
-    if (!isMember) {
-        throw new AppError(
-            "User is not a member of this group",
-            403
-        );
-    }
-};
-
-export const ensureUserIsNotMember = (
-    group: IGroup,
-    userId: string
-): void => {
-
-    const isMember = group.members.some(
-        (member) => getMemberUserId(member) === userId
-    );
-
-    if (isMember) {
-        throw new AppError(
-            "Already a member of this group",
-            400
-        );
-    }
-};
-
-// Helper function.
-const getMemberUserId = (member: IGroupMember): string => {
-    const user = member.user as any;
-
-    return user._id
-        ? user._id.toString()
-        : user.toString();
 };
 
 export const getGroupMemberIds = async (

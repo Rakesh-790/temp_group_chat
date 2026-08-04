@@ -1,5 +1,5 @@
 import { AppError } from "../../utils/AppError";
-import { deleteAvatarFromS3, uploadAvatarToS3 } from "../../utils/s3.utils";
+import { deleteImageFromS3, uploadImageToS3 } from "../../utils/s3.utils";
 import userModel from "../auth/auth.model";
 import { UpdateProfileDTO, UserProfileResponse } from "./user.types";
 
@@ -99,9 +99,10 @@ export const uploadAvatar = async (
 
     const oldAvatarKey = user.avatar?.key;
 
-    const uploadedAvatar = await uploadAvatarToS3({
+    const uploadedAvatar = await uploadImageToS3({
         file,
-        userId
+        folder: 'users',
+        identifier: userId
     });
 
     user.avatar = {
@@ -113,7 +114,7 @@ export const uploadAvatar = async (
 
     if (oldAvatarKey) {
         try {
-            await deleteAvatarFromS3(
+            await deleteImageFromS3(
                 oldAvatarKey
             );
         } catch (error) {

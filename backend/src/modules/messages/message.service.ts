@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
-import { ensureUserIsMember, getGroupById } from "../groups/group.service";
+import { getGroupById } from "../groups/group.service";
 import { IMessage, Message } from "./message.model";
 import { CreateMessageInput, MarkMessageDeliveredInput, MarkMessageReadInput, MessageDeliveryUpdate, MessageReadUpdate } from "./message.types";
 import { AppError } from "../../utils/AppError";
 import groupModel from "../groups/group.model";
+import { ensureUserIsMember } from "../groups/group.permission";
 
 export const createMessage = async (
     input: CreateMessageInput

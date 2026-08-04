@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { AuthRequest } from "../auth/auth.types";
-import { assignRole, createGroup, getAllGroups, getGroupById, joinGroup, softDeleteGroup } from "./group.service";
+import { assignRole, createGroup, getAllGroups, getGroupById, joinGroup, softDeleteGroup, updateGroup, updateGroupAvatar } from "./group.service";
 import { emitNewMessage } from "../../socket/emitter/socket.emitter";
+import { AppError } from "../../utils/AppError";
 
 
 export const createTempGroup = catchAsync(
@@ -146,6 +147,69 @@ export const getAllGroupsController = catchAsync(
             success: true,
             message: "All groups fetched successfully",
             groups
+        });
+    }
+);
+
+export const updateGroupController = catchAsync(
+    async (
+        req: AuthRequest,
+        res: Response
+    ) => {
+
+        const groupId = req.params.groupId as string;
+
+        const requesterId = req.user!.id;
+
+        const {
+            name,
+            description
+        } = req.body;
+
+        const group = await updateGroup(
+            groupId,
+            requesterId,
+            {
+                name,
+                description
+            }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Group updated successfully",
+            data: group
+        });
+    }
+);
+
+export const updateGroupAvatarController = catchAsync(
+    async (
+        req: AuthRequest,
+        res: Response
+    ) => {
+
+        const groupId = req.params.groupId as string;
+
+        const requesterId = req.user!.id;
+
+        if (!req.file) {
+            throw new AppError(
+                "Avatar is required",
+                400
+            );
+        }
+
+        const avatar = await updateGroupAvatar(
+            groupId,
+            requesterId,
+            req.file
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Group avatar updated successfully",
+            data: avatar
         });
     }
 );

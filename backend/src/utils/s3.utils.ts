@@ -5,34 +5,35 @@ import { Upload } from "@aws-sdk/lib-storage";
 
 const s3Client = new S3Client({
     region: AWS_REGION!,
-
     credentials: {
         accessKeyId: AWS_ACCESS_KEY_ID!,
         secretAccessKey: AWS_SECRET_ACCESS_KEY!
     }
 });
 
-interface UploadAvatarParams {
+interface UploadImageParams {
     file: Express.Multer.File;
-    userId: string;
-};
+    folder: string;
+    identifier: string;
+}
 
-interface UploadAvatarResponse {
-    url: string,
-    key: string
-};
+interface UploadImageResponse {
+    url: string;
+    key: string;
+}
 
-export const uploadAvatarToS3 = async({
+export const uploadImageToS3 = async ({
     file,
-    userId
-} : UploadAvatarParams) : Promise<UploadAvatarResponse> => {
+    folder,
+    identifier
+}: UploadImageParams): Promise<UploadImageResponse> => {
 
-    const extension = file.originalname.split('.').pop();
+    const extension = file.originalname.split(".").pop();
 
-    const key = `avatars/${userId}_${uuidV4()}.${extension}`;
+    const key = `uploads/${folder}/${identifier}_${uuidV4()}.${extension}`;
 
     const upload = new Upload({
-        client : s3Client,
+        client: s3Client,
         params: {
             Bucket: AWS_BUCKET_NAME!,
             Key: key,
@@ -49,9 +50,9 @@ export const uploadAvatarToS3 = async({
     };
 };
 
-export const deleteAvatarFromS3 = async(
+export const deleteImageFromS3 = async (
     key: string
-) : Promise<void> => {
+): Promise<void> => {
 
     await s3Client.send(
         new DeleteObjectCommand({

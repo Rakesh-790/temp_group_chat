@@ -1,7 +1,8 @@
 import { Socket } from "socket.io";
-import { ensureUserIsMember, getGroupById } from "../modules/groups/group.service";
+import { getGroupById } from "../modules/groups/group.service";
 import { joinRoomSchema, leaveRoomSchema } from "./socket.validation";
 import { socketEvent } from "./socket.wrapper";
+import { ensureUserIsMember } from "../modules/groups/group.permission";
 
 export const registerRoomHandlers = (
     socket: Socket
