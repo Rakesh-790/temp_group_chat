@@ -35,6 +35,11 @@ export interface Group {
     name: string;
     description?: string;
 
+    avatar: {
+        url: string | null;
+        key?: string | null;
+    };
+
     owner: GroupUser;
     members: GroupMember[];
 
@@ -106,3 +111,22 @@ export interface DeleteGroupResponse {
         deletedAt: string;
     };
 };
+
+export interface UpdateGroupAvatarRequest {
+    groupId: string;
+    file: File;
+};
+
+export interface UpdateGroupRequest {
+    groupId: string;
+    name?: string;
+    description?: string;
+};
+
+export interface UpdateGroupResponse {
+    success: boolean;
+    message: string;
+    data: Group;
+};
+
+export type UpdateGroupAvatarResponse = UpdateGroupResponse;

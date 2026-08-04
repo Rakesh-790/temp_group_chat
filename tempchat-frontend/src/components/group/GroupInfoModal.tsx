@@ -5,6 +5,12 @@ import Modal from "../ui/Modal";
 import GroupMemberItem from "./GroupMemberItem";
 import type { Group } from "../../types/group.types";
 import { useAuthStore } from "../../store/auth.store";
+import { useState } from "react";
+import { useUpdateGroup } from "../../hooks/useUpdateGroup";
+import { useUpdateGroupAvatar } from "../../hooks/useUpdateGroupAvatar";
+import GroupAvatar from "./GroupAvatar";
+import GroupInfoCard from "./GroupInfoCard";
+import EditGroupModal from "./EditGroupModal";
 
 interface GroupInfoModalProps {
     isOpen: boolean;
@@ -27,6 +33,17 @@ const GroupInfoModal = ({
 
     const myRole = myMember?.role;
 
+    const canEdit =
+        myRole === "OWNER" || myRole === "ADMIN";
+
+    const [editingField, setEditingField] = useState<
+        "name" | "description" | null
+    >(null);
+
+    const updateGroupMutation = useUpdateGroup();
+
+    const updateGroupAvatarMutation = useUpdateGroupAvatar();
+
     const handleCopyInviteCode = async () => {
         try {
             await navigator.clipboard.writeText(group.inviteCode);
@@ -34,6 +51,35 @@ const GroupInfoModal = ({
         } catch {
             toast.error("Failed to copy invite code.");
         }
+    };
+
+    const handleAvatarUpload = (file: File) => {
+        updateGroupAvatarMutation.mutate({
+            groupId: group._id,
+            file,
+        });
+    };
+
+    const handleSave = (value: string) => {
+
+        if (!editingField) {
+            return;
+        }
+
+        updateGroupMutation.mutate(
+            {
+                groupId: group._id,
+
+                ...(editingField === "name"
+                    ? { name: value }
+                    : { description: value }),
+            },
+            {
+                onSuccess: () => {
+                    setEditingField(null);
+                },
+            }
+        );
     };
 
     const createdDate = new Date(group.createdAt);
@@ -62,15 +108,28 @@ const GroupInfoModal = ({
 
                 <div className="flex flex-col items-center border-b border-[#2a3942] pb-8">
 
-                    <div className="flex h-28 w-28 items-center justify-center rounded-full bg-[#54656f] text-5xl font-semibold text-white shadow-lg">
-                        {group.name.charAt(0).toUpperCase()}
+                    <GroupAvatar
+                        groupName={group.name}
+                        avatar={group.avatar?.url}
+                        editable={canEdit}
+                        loading={updateGroupAvatarMutation.isPending}
+                        onFileSelect={handleAvatarUpload}
+                    />
+
+                    <div className="mt-6 w-full max-w-md">
+
+                        <GroupInfoCard
+                            label="Group Name"
+                            value={group.name}
+                            editable={canEdit}
+                            onEdit={() =>
+                                setEditingField("name")
+                            }
+                        />
+
                     </div>
 
-                    <h2 className="mt-5 text-3xl font-semibold text-white">
-                        {group.name}
-                    </h2>
-
-                    <p className="mt-2 text-sm text-[#8696a0]">
+                    <p className="mt-4 text-sm text-[#8696a0]">
                         {group.members.length} Members
                     </p>
 
@@ -80,21 +139,18 @@ const GroupInfoModal = ({
 
                 <section className="rounded-xl bg-[#111b21]">
 
-                    <div className="border-b border-[#2a3942] px-5 py-3">
-                        <h3 className="text-sm font-medium uppercase tracking-wide text-[#00a884]">
-                            Description
-                        </h3>
-                    </div>
-
-                    <div className="px-5 py-4">
-
-                        <p className="leading-7 text-[#d1d7db]">
-                            {group.description?.trim()
+                    <GroupInfoCard
+                        label="Description"
+                        value={
+                            group.description?.trim()
                                 ? group.description
-                                : "No description has been added yet."}
-                        </p>
-
-                    </div>
+                                : "No description has been added yet."
+                        }
+                        editable={canEdit}
+                        onEdit={() =>
+                            setEditingField("description")
+                        }
+                    />
 
                 </section>
 
@@ -243,6 +299,33 @@ const GroupInfoModal = ({
                 </div>
 
             </div>
+
+            <EditGroupModal
+                isOpen={editingField !== null}
+                title={
+                    editingField === "name"
+                        ? "Edit Group Name"
+                        : "Edit Description"
+                }
+                label={
+                    editingField === "name"
+                        ? "Group Name"
+                        : "Description"
+                }
+                initialValue={
+                    editingField === "name"
+                        ? group.name
+                        : group.description ?? ""
+                }
+                multiline={
+                    editingField === "description"
+                }
+                loading={updateGroupMutation.isPending}
+                onClose={() =>
+                    setEditingField(null)
+                }
+                onSave={handleSave}
+            />
 
         </Modal>
     );

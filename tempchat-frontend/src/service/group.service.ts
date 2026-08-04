@@ -1,5 +1,5 @@
 import api from "../api/axios";
-import type { CreateGroupRequest, CreateGroupResponse, DeleteGroupResponse, Group, GroupsResponse, JoinGroupRequest, JoinGroupResponse } from "../types/group.types";
+import type { CreateGroupRequest, CreateGroupResponse, DeleteGroupResponse, Group, GroupsResponse, JoinGroupRequest, JoinGroupResponse, UpdateGroupAvatarRequest, UpdateGroupAvatarResponse, UpdateGroupResponse } from "../types/group.types";
 
 export const getGroups = async (): Promise<Group[]> => {
     const response = await api.get<{ groups: GroupsResponse }>("/groups");
@@ -54,6 +54,51 @@ export const assignRole = async ({
         {
             userId,
             role,
+        }
+    );
+
+    return response.data.data;
+};
+
+export interface UpdateGroupRequest {
+    groupId: string;
+    name?: string;
+    description?: string;
+}
+
+export const updateGroup = async ({
+    groupId,
+    name,
+    description,
+}: UpdateGroupRequest): Promise<Group> => {
+
+    const response = await api.patch<UpdateGroupResponse>(
+        `/groups/${groupId}`,
+        {
+            name,
+            description,
+        }
+    );
+
+    return response.data.data;
+};
+
+export const updateGroupAvatar = async ({
+    groupId,
+    file
+} : UpdateGroupAvatarRequest): Promise<Group> => {
+
+    const formData = new FormData();
+
+    formData.append("avatar", file);
+
+    const response = await api.patch<UpdateGroupAvatarResponse>(
+        `/groups/${groupId}/avatar`,
+        formData,
+        {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
         }
     );
 

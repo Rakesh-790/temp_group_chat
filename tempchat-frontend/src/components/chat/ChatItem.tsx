@@ -21,14 +21,24 @@ const ChatItem = ({ group }: ChatItemProps) => {
         <button
             onClick={() => selectChat(group)}
             className={`flex w-full items-center gap-3 border-b border-[#202c33] px-4 py-3 text-left transition ${isSelected
-                    ? "bg-[#2a3942]"
-                    : "hover:bg-[#202c33]"
+                ? "bg-[#2a3942]"
+                : "hover:bg-[#202c33]"
                 }`}
         >
             {/* Avatar */}
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#54656f] font-semibold text-white">
-                {group.name.charAt(0)}
-            </div>
+            {group.avatar?.url ? (
+                <div className="h-12 w-12 overflow-hidden rounded-full">
+                    <img
+                        src={group.avatar.url}
+                        alt={group.name}
+                        className="h-full w-full object-cover object-center"
+                    />
+                </div>
+            ) : (
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#54656f] font-semibold text-white">
+                    {group.name.charAt(0).toUpperCase()}
+                </div>
+            )}
 
             <div className="min-w-0 flex-1">
                 <div className="flex justify-between">

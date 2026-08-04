@@ -282,6 +282,9 @@ export const updateGroup = async (
 
     ensureGroupManager(group, requesterId);
 
+    const previousName = group.name;
+    const previousDescription = group.description ?? null;
+
     if (data.name !== undefined) {
         group.name = data.name;
     }
@@ -292,7 +295,54 @@ export const updateGroup = async (
 
     await group.save();
 
-    return await getPopulatedGroup(group.id);
+    const systemMessages = [];
+
+    if (
+        data.name !== undefined &&
+        previousName !== group.name
+    ) {
+
+        const systemMessage = await createSystemMessage({
+            groupId,
+            senderId: requesterId,
+            event: {
+                action: SystemAction.GROUP_RENAMED,
+                metadata: {
+                    oldName: previousName,
+                    newName: group.name,
+                },
+            },
+        });
+
+        systemMessages.push(systemMessage);
+    }
+
+    if (
+        data.description !== undefined &&
+        previousDescription !== group.description
+    ) {
+
+        const systemMessage = await createSystemMessage({
+            groupId,
+            senderId: requesterId,
+            event: {
+                action: SystemAction.GROUP_DESCRIPTION_UPDATED,
+                metadata: {
+                    oldDescription: previousDescription,
+                    newDescription: group.description ?? null,
+                },
+            },
+        });
+
+        systemMessages.push(systemMessage);
+    }
+
+    const updatedGroup = await getPopulatedGroup(group.id);
+
+    return {
+        group: updatedGroup,
+        systemMessages,
+    };
 };
 
 export const updateGroupAvatar = async (
@@ -338,12 +388,12 @@ export const updateGroupAvatar = async (
     const uploadedAvatar = await uploadImageToS3({
         file,
         folder: "groups",
-        identifier: group.id
+        identifier: group.id,
     });
 
     group.avatar = {
         key: uploadedAvatar.key,
-        url: uploadedAvatar.url
+        url: uploadedAvatar.url,
     };
 
     await group.save();
@@ -359,7 +409,21 @@ export const updateGroupAvatar = async (
         }
     }
 
-    return await getPopulatedGroup(group.id);
+    const systemMessage = await createSystemMessage({
+        groupId,
+        senderId: requesterId,
+        event: {
+            action: SystemAction.GROUP_AVATAR_CHANGED,
+            metadata: {},
+        },
+    });
+
+    const updatedGroup = await getPopulatedGroup(group.id);
+
+    return {
+        group: updatedGroup,
+        systemMessage,
+    };
 };
 
 export const softDeleteGroup = async (

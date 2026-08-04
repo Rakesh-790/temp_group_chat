@@ -11,6 +11,8 @@ interface ChatStore {
 
     selectChat: (chat: Group) => void;
 
+    updateSelectedChat: (chat: Group) => void;
+
     clearSelectedChat: () => void;
 }
 
@@ -21,6 +23,11 @@ export const useChatStore = create<ChatStore>((set) => ({
         set({
             selectedChat: chat,
         }),
+
+    updateSelectedChat: (chat) =>
+    set({
+        selectedChat: chat,
+    }),
 
     clearSelectedChat: () =>
         set({

@@ -61,6 +61,12 @@ export interface OwnerTransferredEvent {
     };
 };
 
+export interface GroupAvatarChangedEvent {
+    action: SystemAction.GROUP_AVATAR_CHANGED;
+
+    metadata: {};
+};
+
 export type SystemEvent =
     | RoleChangedEvent
     | MemberJoinedEvent
@@ -68,4 +74,5 @@ export type SystemEvent =
     | GroupCreatedEvent
     | GroupRenamedEvent
     | GroupDescriptionUpdatedEvent
-    | OwnerTransferredEvent;
+    | OwnerTransferredEvent
+    | GroupAvatarChangedEvent;

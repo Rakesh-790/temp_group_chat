@@ -15,6 +15,8 @@ export const SystemAction = {
 
     GROUP_DESCRIPTION_UPDATED: "GROUP_DESCRIPTION_UPDATED",
 
+    GROUP_AVATAR_CHANGED: "GROUP_AVATAR_CHANGED",
+
     OWNER_TRANSFERRED: "OWNER_TRANSFERRED",
 
     GROUP_EXPIRED: "GROUP_EXPIRED",
@@ -84,6 +86,12 @@ export interface OwnerTransferredEvent {
     };
 }
 
+export interface GroupAvatarChangedEvent {
+    action: typeof SystemAction.GROUP_AVATAR_CHANGED;
+
+    metadata: Record<string, never>;
+}
+
 export type SystemEvent =
     | RoleChangedEvent
     | MemberJoinedEvent
@@ -91,4 +99,5 @@ export type SystemEvent =
     | GroupCreatedEvent
     | GroupRenamedEvent
     | GroupDescriptionUpdatedEvent
-    | OwnerTransferredEvent;
+    | OwnerTransferredEvent
+    | GroupAvatarChangedEvent;

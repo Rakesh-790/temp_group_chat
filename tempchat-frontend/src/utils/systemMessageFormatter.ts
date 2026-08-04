@@ -6,12 +6,15 @@ export const formatSystemMessage = (
     message: Message,
     members: GroupMember[]
 ): string => {
+
     if (!message.systemEvent) {
         return "";
     }
 
     switch (message.systemEvent.action) {
+
         case "ROLE_CHANGED": {
+
             const {
                 targetUserId,
                 previousRole,
@@ -31,6 +34,26 @@ export const formatSystemMessage = (
                     : "demoted to";
 
             return `${targetName} was ${action} ${newRole.toLowerCase()} by ${message.senderName}`;
+        }
+
+        case "GROUP_RENAMED": {
+
+            const {
+                oldName,
+                newName,
+            } = message.systemEvent.metadata;
+
+            return `${message.senderName} changed the group name from "${oldName}" to "${newName}".`;
+        }
+
+        case "GROUP_DESCRIPTION_UPDATED": {
+
+            return `${message.senderName} updated the group description.`;
+        }
+
+        case "GROUP_AVATAR_CHANGED": {
+
+            return `${message.senderName} changed the group photo.`;
         }
 
         default:

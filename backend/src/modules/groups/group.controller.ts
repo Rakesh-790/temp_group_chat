@@ -166,19 +166,26 @@ export const updateGroupController = catchAsync(
             description
         } = req.body;
 
-        const group = await updateGroup(
+        const result = await updateGroup(
             groupId,
             requesterId,
             {
                 name,
-                description
+                description,
             }
         );
+
+        for (const systemMessage of result.systemMessages) {
+            emitNewMessage(
+                groupId,
+                systemMessage
+            );
+        }
 
         return res.status(200).json({
             success: true,
             message: "Group updated successfully",
-            data: group
+            data: result.group,
         });
     }
 );
@@ -200,16 +207,21 @@ export const updateGroupAvatarController = catchAsync(
             );
         }
 
-        const avatar = await updateGroupAvatar(
+        const result = await updateGroupAvatar(
             groupId,
             requesterId,
             req.file
         );
 
+        emitNewMessage(
+            groupId,
+            result.systemMessage
+        );
+
         return res.status(200).json({
             success: true,
             message: "Group avatar updated successfully",
-            data: avatar
+            data: result.group,
         });
     }
 );
