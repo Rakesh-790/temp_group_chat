@@ -25,6 +25,7 @@ export interface MemberRemovedEvent {
 
     metadata: {
         targetUserId: string;
+        previousRole: GroupRole;
     };
 };
 

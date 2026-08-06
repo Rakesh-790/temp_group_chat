@@ -5,8 +5,10 @@ import mongoose from 'mongoose';
 import { addDeleteGroupJob } from '../../jobs/queues/deleteGroup.queues';
 import { Message, SystemAction } from '../messages/message.model';
 import { createSystemMessage } from '../messages/system-message.service';
-import { ensureGroupManager, ensureGroupOwner, ensureUserIsNotMember } from './group.permission';
+import { ensureCanRemoveMember, ensureGroupManager, ensureGroupOwner, ensureUserIsNotMember, getGroupMember } from './group.permission';
 import { deleteImageFromS3, uploadImageToS3 } from '../../utils/s3.utils';
+import { createNotification } from '../notifications/notification.service';
+import { NotificationAction, NotificationType } from '../notifications/notification.constants';
 
 interface CreateGroupData {
     name: string,
@@ -249,6 +251,120 @@ export const assignRole = async (
         systemMessage,
         group: updatedGroup
     };
+};
+
+export const removeMember = async (
+    groupId: string,
+    requesterId: string,
+    targetUserId: string
+) => {
+
+    const session = await mongoose.startSession();
+
+    try {
+
+        session.startTransaction();
+
+        const group = await groupModel
+            .findById(groupId)
+            .session(session);
+
+        if (!group) {
+            throw new AppError(
+                "Group not found",
+                404
+            );
+        }
+
+        if (group.isDeleted) {
+            throw new AppError(
+                "Group has been deleted",
+                400
+            );
+        }
+
+        if (group.expiresAt < new Date()) {
+            throw new AppError(
+                "Group has expired",
+                400
+            );
+        }
+
+        ensureCanRemoveMember(
+            group,
+            requesterId,
+            targetUserId
+        );
+
+        const removedMember = getGroupMember(
+            group,
+            targetUserId
+        );
+
+        group.members.splice(
+            group.members.findIndex(
+                m => m.user.toString() === targetUserId
+            ),
+            1
+        );
+
+        await group.save({
+            session
+        });
+
+        const systemMessage = await createSystemMessage({
+            groupId,
+            senderId: requesterId,
+            event: {
+                action: SystemAction.MEMBER_REMOVED,
+                metadata: {
+                    targetUserId,
+                    previousRole: removedMember.role,
+                },
+            },
+            session,
+        });
+
+        await createNotification({
+            recipientId: targetUserId,
+            type: NotificationType.GROUP,
+            action: NotificationAction.MEMBER_REMOVED,
+            title: `You have been removed from "${group.name}"`,
+            payload: {
+                groupId,
+                groupName: group.name,
+                removedBy: requesterId,
+            },
+            session,
+        });
+
+        await session.commitTransaction();
+
+        const updatedGroup = await getPopulatedGroup(
+            group.id
+        );
+
+        return {
+            groupId,
+            groupName: group.name,
+            targetUserId,
+            requesterId,
+            group: updatedGroup,
+            systemMessage,
+        };
+
+    } catch (error) {
+
+        await session.abortTransaction();
+
+        throw error;
+
+    } finally {
+
+        session.endSession();
+
+    }
+
 };
 
 export const updateGroup = async (

@@ -10,6 +10,15 @@ const groupIdParamsSchema = z.object({
     )
 });
 
+const groupMemberParamsSchema = groupIdParamsSchema.extend({
+    userId: z.string().refine(
+        value => mongoose.Types.ObjectId.isValid(value),
+        {
+            message: "Invalid user id"
+        }
+    )
+});
+
 const groupDetailsSchema = z.object({
     name: z
         .string()
@@ -77,6 +86,10 @@ export const assignRoleSchema = z.object({
             "MEMBER"
         ])
     })
+});
+
+export const removeMemberSchema = z.object({
+    params: groupMemberParamsSchema
 });
 
 export const deleteGroupSchema = z.object({

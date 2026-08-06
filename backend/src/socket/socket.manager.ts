@@ -1,6 +1,6 @@
 import { Socket } from "socket.io";
 
-class SocketManager{
+class SocketManager {
 
     private userSockets: Map<string, Set<Socket>> = new Map();
 
@@ -15,15 +15,15 @@ class SocketManager{
         console.log(`User ${userId} connected (${this.userSockets.get(userId)!.size} socket(s))`);
     };
 
-    removeSocket(userId: string, socket: Socket): void{
+    removeSocket(userId: string, socket: Socket): void {
 
         const sockets = this.userSockets.get(userId);
 
-        if(!sockets) return;
+        if (!sockets) return;
 
         sockets.delete(socket);
 
-        if(sockets.size === 0){
+        if (sockets.size === 0) {
             this.userSockets.delete(userId);
         };
 
@@ -37,12 +37,12 @@ class SocketManager{
         return this.userSockets.get(userId)?.size ?? 0;
     }
 
-    getUserSockets(userId: string): Socket[]{
+    getUserSockets(userId: string): Socket[] {
 
         return Array.from(this.userSockets.get(userId) ?? []);
     };
 
-    isUserOnline(userId: string): boolean{
+    isUserOnline(userId: string): boolean {
 
         return this.userSockets.has(userId);
     };
@@ -51,10 +51,22 @@ class SocketManager{
 
         const sockets = this.getUserSockets(userId);
 
-        for(const socket of sockets){
+        for (const socket of sockets) {
             socket.emit(event, payload);
         };
     };
+
+    removeUserFromRoom(
+        userId: string,
+        roomId: string
+    ): void {
+
+        const sockets = this.getUserSockets(userId);
+
+        for (const socket of sockets) {
+            socket.leave(roomId);
+        }
+    }
 };
 
 export const socketManager = new SocketManager();

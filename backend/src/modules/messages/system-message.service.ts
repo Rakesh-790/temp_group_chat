@@ -1,3 +1,4 @@
+import { ClientSession } from "mongoose";
 import { AppError } from "../../utils/AppError";
 import { getGroupById } from "../groups/group.service";
 import { Message, MessageType, SystemAction } from "./message.model";
@@ -7,35 +8,39 @@ interface CreateSystemMessageInput {
     groupId: string;
     senderId: string;
     event: SystemEvent;
+    session?: ClientSession;
 };
 
 export const createSystemMessage = async (
     input: CreateSystemMessageInput
 ) => {
 
-    const group = await getGroupById(input.groupId);
+    const message = new Message({
+        group: input.groupId,
 
-    const createdMessage = await Message.create({
-        group: group._id,
-    
         sender: input.senderId,
-    
+
         type: MessageType.SYSTEM,
-    
+
         content: null,
-    
+
         systemEvent: input.event,
     });
 
-    const message = await Message.findById(createdMessage._id)
-    .populate("sender", "username avatar");
+    await message.save({
+        session: input.session,
+    });
 
-    if (!message) {
+    const populatedMessage = await Message.findById(message._id)
+        .populate("sender", "username avatar")
+        .session(input.session ?? null);
+
+    if (!populatedMessage) {
         throw new AppError(
             "Failed to create system message",
             500
         );
-    };
+    }
 
-    return message;
+    return populatedMessage;
 };

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { AuthRequest } from "../auth/auth.types";
-import { assignRole, createGroup, getAllGroups, getGroupById, joinGroup, softDeleteGroup, updateGroup, updateGroupAvatar } from "./group.service";
-import { emitNewMessage } from "../../socket/emitter/socket.emitter";
+import { assignRole, createGroup, getAllGroups, getGroupById, joinGroup, removeMember, softDeleteGroup, updateGroup, updateGroupAvatar } from "./group.service";
+import { emitGroupRemoved, emitMemberRemoved, emitNewMessage, removeUserFromGroupRoom } from "../../socket/emitter/socket.emitter";
 import { AppError } from "../../utils/AppError";
 
 
@@ -223,5 +223,60 @@ export const updateGroupAvatarController = catchAsync(
             message: "Group avatar updated successfully",
             data: result.group,
         });
+    }
+);
+
+export const removeGroupMember = catchAsync(
+    async (
+        req: AuthRequest,
+        res: Response
+    ) => {
+
+        const groupId = req.params.groupId as string;
+
+        const targetUserId = req.params.userId as string;
+
+        const requesterId = req.user!.id;
+
+        const result = await removeMember(
+            groupId,
+            requesterId,
+            targetUserId
+        );
+
+        // system message will be sent to the group, notifying that a member has been removed
+        emitNewMessage(
+            groupId,
+            result.systemMessage
+        );
+
+        // notify the removed member that they have been removed from the group
+        emitGroupRemoved(
+            targetUserId,
+            {
+                groupId,
+                groupName: result.groupName,
+                removedBy: requesterId,
+            }
+        );
+
+        // remove the user from the group room, so they no longer receive messages from that group
+        removeUserFromGroupRoom(
+            targetUserId,
+            groupId
+        );
+
+        // remaining users in the group will be notified that a member has been removed
+        emitMemberRemoved({
+            groupId,
+            removedUserId: targetUserId,
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Member removed successfully",
+            data: result,
+        });
+
     }
 );
