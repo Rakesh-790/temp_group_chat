@@ -50,7 +50,9 @@ export interface MemberRemovedEvent {
 
     metadata: {
         targetUserId: string;
-    };
+        targetUsername: string;
+        previousRole: GroupRole;
+    }
 }
 
 export interface GroupCreatedEvent {

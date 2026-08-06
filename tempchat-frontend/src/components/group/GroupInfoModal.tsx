@@ -203,18 +203,18 @@ const GroupInfoModal = ({
                     <div className="max-h-85 overflow-y-auto py-2">
 
                         {group.members.map((member) => {
-                            const showActions =
-                                myRole === "OWNER" &&
-                                member.role !== "OWNER";
 
                             return (
                                 <GroupMemberItem
                                     key={member.user._id}
                                     groupId={group._id}
+                                    groupName={group.name}
                                     member={member}
-                                    showActions={showActions}
+                                    currentUserId={user!.id}
+                                    currentUserRole={myRole!}
                                 />
                             );
+
                         })}
 
                     </div>

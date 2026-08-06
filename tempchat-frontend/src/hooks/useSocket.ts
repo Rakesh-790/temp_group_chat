@@ -5,6 +5,7 @@ import {
     connectSocket,
     disconnectSocket,
 } from "../service/socket.service";
+import { registerGroupEvents } from "../socket/registerGroupEvents";
 
 export const useSocket = () => {
 
@@ -18,6 +19,8 @@ export const useSocket = () => {
         }
 
         connectSocket();
+        
+        const unregisterGroupEvents = registerGroupEvents(socket);
 
         const onConnect = () => {
             console.log("✅ Socket Connected:", socket.id);
@@ -35,7 +38,10 @@ export const useSocket = () => {
         socket.on("disconnect", onDisconnect);
         socket.on("connect_error", onConnectError);
 
+
         return () => {
+
+            unregisterGroupEvents();
 
             socket.off("connect", onConnect);
             socket.off("disconnect", onDisconnect);

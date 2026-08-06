@@ -9,6 +9,7 @@ import { ensureCanRemoveMember, ensureGroupManager, ensureGroupOwner, ensureUser
 import { deleteImageFromS3, uploadImageToS3 } from '../../utils/s3.utils';
 import { createNotification } from '../notifications/notification.service';
 import { NotificationAction, NotificationType } from '../notifications/notification.constants';
+import userModel from '../auth/auth.model';
 
 interface CreateGroupData {
     name: string,
@@ -301,6 +302,18 @@ export const removeMember = async (
             targetUserId
         );
 
+        const removedUser = await userModel
+            .findById(targetUserId)
+            .select("username")
+            .session(session);
+
+        if (!removedUser) {
+            throw new AppError(
+                "User not found",
+                404
+            );
+        }
+
         group.members.splice(
             group.members.findIndex(
                 m => m.user.toString() === targetUserId
@@ -319,6 +332,7 @@ export const removeMember = async (
                 action: SystemAction.MEMBER_REMOVED,
                 metadata: {
                     targetUserId,
+                    targetUsername: removedUser.username,
                     previousRole: removedMember.role,
                 },
             },
@@ -341,8 +355,15 @@ export const removeMember = async (
         await session.commitTransaction();
 
         const updatedGroup = await getPopulatedGroup(
-            group.id
+            groupId
         );
+
+        if (!updatedGroup) {
+            throw new AppError(
+                "Failed to fetch updated group",
+                500
+            );
+        }
 
         return {
             groupId,

@@ -60,6 +60,23 @@ export const assignRole = async ({
     return response.data.data;
 };
 
+export interface RemoveMemberRequest {
+    groupId: string;
+    userId: string;
+}
+
+export const removeMember = async ({
+    groupId,
+    userId,
+}: RemoveMemberRequest) => {
+
+    const response = await api.delete(
+        `/groups/${groupId}/members/${userId}`
+    );
+
+    return response.data.data;
+};
+
 export interface UpdateGroupRequest {
     groupId: string;
     name?: string;

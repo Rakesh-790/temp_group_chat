@@ -267,10 +267,7 @@ export const removeGroupMember = catchAsync(
         );
 
         // remaining users in the group will be notified that a member has been removed
-        emitMemberRemoved({
-            groupId,
-            removedUserId: targetUserId,
-        });
+        emitMemberRemoved(result.group);
 
         return res.status(200).json({
             success: true,

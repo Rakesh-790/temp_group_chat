@@ -1,7 +1,6 @@
 import type { GroupMember } from "../types/group.types";
 import type { Message } from "../types/message.types";
 
-
 export const formatSystemMessage = (
     message: Message,
     members: GroupMember[]
@@ -36,6 +35,15 @@ export const formatSystemMessage = (
             return `${targetName} was ${action} ${newRole.toLowerCase()} by ${message.senderName}`;
         }
 
+        case "MEMBER_REMOVED": {
+
+            const {
+                targetUsername,
+            } = message.systemEvent.metadata;
+
+            return `${targetUsername} was removed by ${message.senderName}.`;
+        }
+
         case "GROUP_RENAMED": {
 
             const {
@@ -59,4 +67,5 @@ export const formatSystemMessage = (
         default:
             return "";
     }
+
 };

@@ -1,16 +1,12 @@
 import { IMessage } from "../../modules/messages/message.model";
 import { getIo } from "../socket.server";
 import { socketManager } from "../socket.manager";
+import { IGroup } from "../../modules/groups/group.model";
 
 interface GroupRemovedPayload {
     groupId: string;
     groupName: string;
     removedBy: string;
-};
-
-interface MemberRemovedPayload {
-    groupId: string;
-    removedUserId: string;
 };
 
 export const emitNewMessage = (
@@ -24,14 +20,14 @@ export const emitNewMessage = (
 };
 
 export const emitMemberRemoved = (
-    payload: MemberRemovedPayload
+    group: IGroup
 ): void => {
 
     getIo()
-        .to(payload.groupId)
+        .to(group._id.toString())
         .emit(
             "group:memberRemoved",
-            payload
+            group
         );
 };
 
