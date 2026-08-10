@@ -35,6 +35,22 @@ export const formatSystemMessage = (
             return `${targetName} was ${action} ${newRole.toLowerCase()} by ${message.senderName}`;
         }
 
+        case "MEMBER_JOINED": {
+
+            const {
+                userId,
+            } = message.systemEvent.metadata;
+
+            const joinedMember = members.find(
+                member => member.user._id === userId
+            );
+
+            const joinedName =
+                joinedMember?.user.username ?? "Unknown User";
+
+            return `${joinedName} joined the group.`;
+        }
+
         case "MEMBER_REMOVED": {
 
             const {

@@ -110,6 +110,41 @@ export const registerGroupEvents = (
 
     };
 
+    const onGroupUpdated = async ({
+        groupId,
+    }: {
+        groupId: string;
+        action: "MEMBER_JOINED" | "ROLE_CHANGED" | "MEMBER_REMOVED";
+    }) => {
+
+        await queryClient.refetchQueries({
+            queryKey: ["groups"],
+        });
+
+        const updatedGroups =
+            queryClient.getQueryData<Group[]>(["groups"]);
+
+        const updatedGroup = updatedGroups?.find(
+            group => group._id === groupId
+        );
+
+        if (!updatedGroup) {
+            return;
+        }
+
+        const {
+            selectedChat,
+            updateSelectedChat,
+        } = useChatStore.getState();
+
+        if (
+            selectedChat?._id === groupId
+        ) {
+            updateSelectedChat(updatedGroup);
+        }
+
+    };
+
     socket.on(
         "group:removed",
         onGroupRemoved
@@ -118,6 +153,11 @@ export const registerGroupEvents = (
     socket.on(
         "group:memberRemoved",
         onMemberRemoved
+    );
+
+    socket.on(
+        "group:updated",
+        onGroupUpdated
     );
 
     return () => {
@@ -130,6 +170,11 @@ export const registerGroupEvents = (
         socket.off(
             "group:memberRemoved",
             onMemberRemoved
+        );
+
+        socket.off(
+            "group:updated",
+            onGroupUpdated
         );
 
     };

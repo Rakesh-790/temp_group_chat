@@ -19,6 +19,22 @@ export const emitNewMessage = (
         .emit("message:new", message);
 };
 
+export const emitMessageToUsers = (
+    userIds: string[],
+    message: IMessage
+): void => {
+
+    for (const userId of userIds) {
+
+        socketManager.emitToUser(
+            userId,
+            "message:new",
+            message
+        );
+
+    }
+};
+
 export const emitMemberRemoved = (
     group: IGroup
 ): void => {
@@ -41,6 +57,31 @@ export const emitGroupRemoved = (
         "group:removed",
         payload
     );
+};
+
+interface GroupUpdatedPayload {
+    groupId: string;
+    action:
+        | "MEMBER_JOINED"
+        | "ROLE_CHANGED"
+        | "MEMBER_REMOVED";
+}
+
+export const emitGroupUpdated = (
+    memberIds: string[],
+    payload: GroupUpdatedPayload
+): void => {
+
+    for (const memberId of memberIds) {
+
+        socketManager.emitToUser(
+            memberId,
+            "group:updated",
+            payload
+        );
+
+    }
+
 };
 
 export const removeUserFromGroupRoom = (

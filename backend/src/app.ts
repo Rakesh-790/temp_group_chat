@@ -7,6 +7,7 @@ import sessionRouter from "./modules/session/session.routes";
 import useRouter from "./modules/users/user.routes";
 import { groupRouter } from "./modules/groups/group.routes";
 import { messageRouter } from "./modules/messages/message.routes";
+import { notificationRouter } from "./modules/notifications/notification.router";
 
 export const app = express();
 
@@ -24,5 +25,6 @@ app.use('/api/session', sessionRouter);
 app.use('/api/users', useRouter);
 app.use('/api/groups', groupRouter);
 app.use('/api/messages', messageRouter);
+app.use("/api/notifications", notificationRouter);
 
 app.use(errorMiddleware);

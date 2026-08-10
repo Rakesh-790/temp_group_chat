@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { AuthRequest } from "../auth/auth.types";
 import { assignRole, createGroup, getAllGroups, getGroupById, joinGroup, removeMember, softDeleteGroup, updateGroup, updateGroupAvatar } from "./group.service";
-import { emitGroupRemoved, emitMemberRemoved, emitNewMessage, removeUserFromGroupRoom } from "../../socket/emitter/socket.emitter";
+import { emitGroupRemoved, emitGroupUpdated, emitMessageToUsers, emitNewMessage, removeUserFromGroupRoom } from "../../socket/emitter/socket.emitter";
 import { AppError } from "../../utils/AppError";
 
 
@@ -51,13 +51,24 @@ export const joinTempGroup = catchAsync(
             req.user!.id
         );
 
+        emitNewMessage(
+            group.id,
+            group.systemMessage
+        );
+
+        emitGroupUpdated(
+            group.memberIds,
+            {
+                groupId: group.id,
+                action: "MEMBER_JOINED",
+            }
+        );
 
         return res.status(200).json({
             success: true,
             message: 'Joined Group Successfully',
             group
         });
-
     }
 );
 
@@ -83,6 +94,14 @@ export const assignMemberRole = catchAsync(
             result.systemMessage
         );
 
+        emitGroupUpdated(
+            result.memberIds,
+            {
+                groupId: result.groupId,
+                action: "ROLE_CHANGED",
+            }
+        );
+
         return res.status(200).json({
             success: true,
             message: 'Role updated successfully',
@@ -97,7 +116,7 @@ export const deleteTempGroup = catchAsync(
         res: Response
     ) => {
 
-        const groupId  = req.params.groupId as string;
+        const groupId = req.params.groupId as string;
 
         const group = await softDeleteGroup(
             groupId,
@@ -113,7 +132,7 @@ export const deleteTempGroup = catchAsync(
 );
 
 export const getGroupByIdController = catchAsync(
-    async(
+    async (
         req: Request,
         res: Response
     ) => {
@@ -131,7 +150,7 @@ export const getGroupByIdController = catchAsync(
 );
 
 export const getAllGroupsController = catchAsync(
-    async(
+    async (
         req: AuthRequest,
         res: Response
     ) => {
@@ -244,13 +263,22 @@ export const removeGroupMember = catchAsync(
             targetUserId
         );
 
-        // system message will be sent to the group, notifying that a member has been removed
-        emitNewMessage(
-            groupId,
+        // Send the removal system message to all remaining members
+        emitMessageToUsers(
+            result.memberIds,
             result.systemMessage
         );
 
-        // notify the removed member that they have been removed from the group
+        // Notify remaining members that the group membership changed
+        emitGroupUpdated(
+            result.memberIds,
+            {
+                groupId,
+                action: "MEMBER_REMOVED",
+            }
+        );
+
+        // Notify the removed member
         emitGroupRemoved(
             targetUserId,
             {
@@ -260,14 +288,11 @@ export const removeGroupMember = catchAsync(
             }
         );
 
-        // remove the user from the group room, so they no longer receive messages from that group
+        // Remove the user from the group room
         removeUserFromGroupRoom(
             targetUserId,
             groupId
         );
-
-        // remaining users in the group will be notified that a member has been removed
-        emitMemberRemoved(result.group);
 
         return res.status(200).json({
             success: true,

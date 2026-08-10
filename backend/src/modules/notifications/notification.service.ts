@@ -46,3 +46,38 @@ export const createNotification = async (
 
     return notification;
 };
+
+export const getUnreadNotifications = async (
+    userId: string
+) => {
+
+    return Notification.find({
+        recipient: userId,
+        read: false,
+    })
+        .sort({
+            createdAt: -1,
+        })
+        .lean();
+};
+
+export const markNotificationAsRead = async (
+    notificationId: string,
+    userId: string
+) => {
+
+    return Notification.findOneAndUpdate(
+        {
+            _id: notificationId,
+            recipient: userId,
+        },
+        {
+            $set: {
+                read: true,
+            },
+        },
+        {
+            new: true,
+        }
+    );
+};

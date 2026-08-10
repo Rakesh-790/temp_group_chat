@@ -43,7 +43,8 @@ const GroupMemberItem = ({
         member.role === "MEMBER";
 
     const canDemote =
-        false;
+        currentUserRole === "OWNER" &&
+        member.role === "ADMIN";
 
     const canRemove =
         !isSelf &&

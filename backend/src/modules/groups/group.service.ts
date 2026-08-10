@@ -99,21 +99,21 @@ export const joinGroup = async (
             'Group not Found',
             404
         );
-    };
+    }
 
     if (group.isDeleted) {
         throw new AppError(
             'Group has been deleted',
             400
         );
-    };
+    }
 
     if (group.expiresAt < new Date()) {
         throw new AppError(
             'Group has expired',
             400
         );
-    };
+    }
 
     ensureUserIsNotMember(group, userId);
 
@@ -125,10 +125,27 @@ export const joinGroup = async (
 
     await group.save();
 
+    const systemMessage = await createSystemMessage({
+        groupId: group.id,
+        senderId: userId,
+        event: {
+            action: SystemAction.MEMBER_JOINED,
+            metadata: {
+                userId
+            },
+        },
+    });
+
+    const memberIds = group.members.map(
+        member => member.user.toString()
+    );
+
     return {
         id: group.id,
         name: group.name,
-        expiresAt: group.expiresAt
+        expiresAt: group.expiresAt,
+        memberIds,
+        systemMessage,
     };
 };
 
@@ -250,7 +267,10 @@ export const assignRole = async (
         previousRole,
         newRole: role,
         systemMessage,
-        group: updatedGroup
+        group: updatedGroup,
+        memberIds: updatedGroup!.members.map(
+            member => member.user._id.toString()
+        ),
     };
 };
 
@@ -325,6 +345,10 @@ export const removeMember = async (
             session
         });
 
+        const memberIds = group.members.map(
+            member => member.user.toString()
+        );
+
         const systemMessage = await createSystemMessage({
             groupId,
             senderId: requesterId,
@@ -372,6 +396,7 @@ export const removeMember = async (
             requesterId,
             group: updatedGroup,
             systemMessage,
+            memberIds,
         };
 
     } catch (error) {
