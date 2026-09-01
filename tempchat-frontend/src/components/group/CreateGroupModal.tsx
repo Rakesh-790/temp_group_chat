@@ -10,8 +10,8 @@ import {
     type CreateGroupFormData,
 } from "../../validation/group.validation";
 
-import { useCreateGroup } from "../../hooks/useCreateGroup";
 import type { CreatedGroup } from "../../types/group.types";
+import { useCreateGroup } from "../../hooks/group/useCreateGroup";
 
 interface CreateGroupModalProps {
     isOpen: boolean;

@@ -8,8 +8,8 @@ import {
     joinGroupSchema,
     type JoinGroupFormData,
 } from "../../validation/group.validation";
+import { useJoinGroup } from "../../hooks/group/useJoinGroup";
 
-import { useJoinGroup } from "../../hooks/useJoinGroup";
 
 interface JoinGroupModalProps {
     isOpen: boolean;

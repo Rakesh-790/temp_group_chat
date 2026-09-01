@@ -1,8 +1,8 @@
-import { useMessageEvents } from "./hooks/useMessageEvents";
-import { usePresence } from "./hooks/usePresence";
-import { useRoom } from "./hooks/useRoom";
-import useSession from "./hooks/useSession";
-import { useSocket } from "./hooks/useSocket";
+import useSession from "./hooks/auth/useSession";
+import { useMessageEvents } from "./hooks/chat/useMessageEvents";
+import { useRoom } from "./hooks/chat/useRoom";
+import { usePresence } from "./hooks/socket/usePresence";
+import { useSocket } from "./hooks/socket/useSocket";
 import AppRouter from "./routes/AppRouter";
 import { useAuthStore } from "./store/auth.store";
 

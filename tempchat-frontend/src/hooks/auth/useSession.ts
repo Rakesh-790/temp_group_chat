@@ -1,13 +1,14 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
-import { getProfile } from "../service/auth.service";
-import { getUnreadNotifications, markNotificationAsRead } from "../service/notification.service";
-import { useAuthStore } from "../store/auth.store";
-import { useChatStore } from "../store/chat.store";
-import { queryClient } from "../lib/react-query";
-import type { Group } from "../types/group.types";
-import { isPublicAuthRoute } from "../utils/auth";
+import { useAuthStore } from "../../store/auth.store";
+import { isPublicAuthRoute } from "../../utils/auth";
+import { getProfile } from "../../service/auth.service";
+import { getUnreadNotifications, markNotificationAsRead } from "../../service/notification.service";
+import { queryClient } from "../../lib/react-query";
+import type { Group } from "../../types/group.types";
+import { useChatStore } from "../../store/chat.store";
+
 
 const useSession = () => {
 

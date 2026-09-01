@@ -1,4 +1,4 @@
-import { useRemoveMember } from "../../hooks/useRemoveMember";
+import { useRemoveMember } from "../../hooks/group/useRemoveMember";
 import Modal from "../ui/Modal";
 
 interface RemoveMemberModalProps {

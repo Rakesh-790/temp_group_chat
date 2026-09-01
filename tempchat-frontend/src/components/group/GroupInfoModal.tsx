@@ -6,11 +6,11 @@ import GroupMemberItem from "./GroupMemberItem";
 import type { Group } from "../../types/group.types";
 import { useAuthStore } from "../../store/auth.store";
 import { useState } from "react";
-import { useUpdateGroup } from "../../hooks/useUpdateGroup";
-import { useUpdateGroupAvatar } from "../../hooks/useUpdateGroupAvatar";
 import GroupAvatar from "./GroupAvatar";
 import GroupInfoCard from "./GroupInfoCard";
 import EditGroupModal from "./EditGroupModal";
+import { useUpdateGroup } from "../../hooks/group/useUpdateGroup";
+import { useUpdateGroupAvatar } from "../../hooks/group/useUpdateGroupAvatar";
 
 interface GroupInfoModalProps {
     isOpen: boolean;

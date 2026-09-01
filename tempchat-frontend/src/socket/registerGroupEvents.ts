@@ -60,7 +60,7 @@ export const registerGroupEvents = (
         }
 
         toast.error(
-            `You have been removed from "${payload.groupName}".`
+            `Group "${payload.groupName}" has been deleted.`
         );
 
         /**
@@ -145,6 +145,41 @@ export const registerGroupEvents = (
 
     };
 
+    const onGroupAvatarUpdated = (
+        updatedGroup: Group
+    ) => {
+
+        queryClient.setQueryData<Group[]>(
+            ["groups"],
+            (oldGroups) => {
+
+                if (!oldGroups) {
+                    return oldGroups;
+                }
+
+                return oldGroups.map(
+                    (group) =>
+                        group._id === updatedGroup._id
+                            ? updatedGroup
+                            : group
+                );
+            }
+        );
+
+        const {
+            selectedChat,
+            updateSelectedChat,
+        } = useChatStore.getState();
+
+        if (
+            selectedChat?._id === updatedGroup._id
+        ) {
+            updateSelectedChat(
+                updatedGroup
+            );
+        }
+    };
+
     socket.on(
         "group:removed",
         onGroupRemoved
@@ -158,6 +193,11 @@ export const registerGroupEvents = (
     socket.on(
         "group:updated",
         onGroupUpdated
+    );
+
+    socket.on(
+        "group:avatarUpdated",
+        onGroupAvatarUpdated
     );
 
     return () => {
@@ -175,6 +215,11 @@ export const registerGroupEvents = (
         socket.off(
             "group:updated",
             onGroupUpdated
+        );
+
+        socket.off(
+            "group:avatarUpdated",
+            onGroupAvatarUpdated
         );
 
     };

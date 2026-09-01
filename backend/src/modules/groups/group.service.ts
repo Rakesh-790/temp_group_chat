@@ -501,6 +501,13 @@ export const updateGroup = async (
 
     const updatedGroup = await getPopulatedGroup(group.id);
 
+    if (!updatedGroup) {
+        throw new AppError(
+            "Group not found after avatar update",
+            404
+        );
+    }
+
     return {
         group: updatedGroup,
         systemMessages,
@@ -636,7 +643,10 @@ export const softDeleteGroup = async (
     return {
         groupId: group.id,
         name: group.name,
-        deletedAt: group.deletedAt
+        deletedAt: group.deletedAt,
+        memberIds: group.members.map(
+            member => member.user.toString()
+        )
     };
 };
 

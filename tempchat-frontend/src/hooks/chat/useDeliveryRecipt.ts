@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
-import { useAuthStore } from "../store/auth.store";
-import { markMessagesDelivered } from "../service/socket.service";
-import type { ApiMessage } from "../types/message.types";
+import type { ApiMessage } from "../../types/message.types";
+import { useAuthStore } from "../../store/auth.store";
+import { markMessagesDelivered } from "../../service/socket.service";
 
 export const useDeliveryReceipt = (
     groupId: string | null,

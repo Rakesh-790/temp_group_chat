@@ -84,6 +84,22 @@ export const emitGroupUpdated = (
 
 };
 
+export const emitGroupAvatarUpdated = (
+    group: IGroup | null
+): void => {
+
+    if (!group) {
+        return;
+    }
+
+    getIo()
+        .to(group._id.toString())
+        .emit(
+            "group:avatarUpdated",
+            group
+        );
+};
+
 export const removeUserFromGroupRoom = (
     userId: string,
     groupId: string

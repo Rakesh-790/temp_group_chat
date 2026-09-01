@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useAssignRole } from "../../hooks/useAssignRole";
 import type { GroupMember } from "../../types/group.types";
 import MemberActionMenu from "./MemberActionMenu";
 import RemoveMemberModal from "./RemoveMemberModal";
+import { useAssignRole } from "../../hooks/group/useAssignRole";
 
 interface GroupMemberItemProps {
     groupId: string;

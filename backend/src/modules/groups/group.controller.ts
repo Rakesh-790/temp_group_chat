@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { AuthRequest } from "../auth/auth.types";
 import { assignRole, createGroup, getAllGroups, getGroupById, joinGroup, removeMember, softDeleteGroup, updateGroup, updateGroupAvatar } from "./group.service";
-import { emitGroupRemoved, emitGroupUpdated, emitMessageToUsers, emitNewMessage, removeUserFromGroupRoom } from "../../socket/emitter/socket.emitter";
+import { emitGroupAvatarUpdated, emitGroupRemoved, emitGroupUpdated, emitMessageToUsers, emitNewMessage, removeUserFromGroupRoom } from "../../socket/emitter/socket.emitter";
 import { AppError } from "../../utils/AppError";
 
 
@@ -123,6 +123,23 @@ export const deleteTempGroup = catchAsync(
             req.user!.id
         );
 
+        for (const memberId of group.memberIds) {
+
+            if (memberId.toString() === req.user!.id.toString()) {
+        continue;
+    }
+
+            emitGroupRemoved(
+                memberId,
+                {
+                    groupId: group.groupId,
+                    groupName: group.name,
+                    removedBy: req.user!.id,
+                }
+            );
+
+        }
+
         return res.status(200).json({
             success: true,
             message: 'Group deleted successfully',
@@ -230,6 +247,10 @@ export const updateGroupAvatarController = catchAsync(
             groupId,
             requesterId,
             req.file
+        );
+
+        emitGroupAvatarUpdated(
+            result.group
         );
 
         emitNewMessage(

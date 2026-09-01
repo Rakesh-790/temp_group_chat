@@ -48,9 +48,19 @@ const ChatHeader = ({ chat }: ChatHeaderProps) => {
         <>
             <header className="flex h-16 items-center justify-between border-b border-[#2a3942] bg-[#202c33] px-5">
                 <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#54656f] font-semibold text-white">
-                        {chat.name.charAt(0).toUpperCase()}
-                    </div>
+                    {chat.avatar?.url ? (
+                        <div className="h-10 w-10 overflow-hidden rounded-full">
+                            <img
+                                src={chat.avatar.url}
+                                alt={chat.name}
+                                className="h-full w-full object-cover object-center"
+                            />
+                        </div>
+                    ) : (
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#54656f] font-semibold text-white">
+                            {chat.name.charAt(0).toUpperCase()}
+                        </div>
+                    )}
 
                     <div>
                         <h2 className="font-medium text-white">

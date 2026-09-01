@@ -45,7 +45,7 @@ const GroupInviteModal = ({
 
                 {/* Header */}
                 <div className="text-center">
-                    <h2 className="text-2xl font-bold text-gray-900">
+                    <h2 className="text-2xl font-bold text-gray-300">
                         Group Created!
                     </h2>
 
@@ -57,7 +57,7 @@ const GroupInviteModal = ({
 
                 {/* Invite Code */}
                 <div>
-                    <p className="mb-2 text-sm font-medium text-gray-600">
+                    <p className="mb-2 text-sm font-medium text-gray-400">
                         Invite Code
                     </p>
 
@@ -78,7 +78,7 @@ const GroupInviteModal = ({
                 {/* Group Details */}
                 <div className="grid grid-cols-2 gap-4">
                     <div className="rounded-xl border bg-gray-50 p-4">
-                        <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                        <p className="text-xs font-medium uppercase tracking-wide text-gray-700">
                             Group
                         </p>
 
@@ -88,7 +88,7 @@ const GroupInviteModal = ({
                     </div>
 
                     <div className="rounded-xl border bg-gray-50 p-4">
-                        <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                        <p className="text-xs font-medium uppercase tracking-wide text-gray-700">
                             Expires
                         </p>
 

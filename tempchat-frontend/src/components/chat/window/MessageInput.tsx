@@ -113,6 +113,7 @@ const MessageInput = () => {
                         py-3
                         outline-none
                         placeholder:text-[#e9edf0]
+                        text-[#e9edf0]
                     "
                 />
 

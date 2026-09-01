@@ -11,7 +11,8 @@ import type { CreatedGroup } from "../../types/group.types";
 import GroupInviteModal from "../group/GroupInviteModal";
 import LogoutModal from "../auth/LogoutModal";
 import { useUIStore } from "../../store/ui.store";
-import { useProfile } from "../../hooks/useProfile";
+import { useProfile } from "../../hooks/profile/useProfile";
+
 
 const LeftRail = () => {
 

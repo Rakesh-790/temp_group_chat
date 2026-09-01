@@ -1,8 +1,9 @@
 import { AlertTriangle } from "lucide-react";
 
 import Modal from "../ui/Modal";
-import { useDeleteGroup } from "../../hooks/useDeleteGroup";
+
 import type { Group } from "../../types/group.types";
+import { useDeleteGroup } from "../../hooks/group/useDeleteGroup";
 
 interface DeleteGroupModalProps {
     isOpen: boolean;
