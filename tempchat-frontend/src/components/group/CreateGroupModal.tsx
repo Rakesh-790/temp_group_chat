@@ -8,7 +8,7 @@ import Modal from "../ui/Modal";
 import {
     createGroupSchema,
     type CreateGroupFormData,
-} from "../../schema/group.schema";
+} from "../../validation/group.validation";
 
 import { useCreateGroup } from "../../hooks/useCreateGroup";
 import type { CreatedGroup } from "../../types/group.types";

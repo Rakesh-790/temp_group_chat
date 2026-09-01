@@ -7,7 +7,7 @@ import Modal from "../ui/Modal";
 import {
     joinGroupSchema,
     type JoinGroupFormData,
-} from "../../schema/group.schema";
+} from "../../validation/group.validation";
 
 import { useJoinGroup } from "../../hooks/useJoinGroup";
 
