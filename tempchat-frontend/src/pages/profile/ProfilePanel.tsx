@@ -2,9 +2,10 @@ import { useState } from "react";
 import ProfileAvatar from "../../components/profile/ProfileAvatar";
 import ProfileInfoCard from "../../components/profile/ProfileInfoCard";
 import EditProfileModal from "../../components/profile/EditProfileModal";
-import { useProfile } from "../../hooks/useProfile";
-import { useUploadAvatar } from "../../hooks/useUploadAvatar";
-import { useUpdateProfile } from "../../hooks/useUpdateProfile";
+import { useProfile } from "../../hooks/profile/useProfile";
+import { useUploadAvatar } from "../../hooks/profile/useUploadAvatar";
+import { useUpdateProfile } from "../../hooks/profile/useUpdateProfile";
+
 
 const ProfilePanel = () => {
     const { data: profile, isLoading, error } = useProfile();

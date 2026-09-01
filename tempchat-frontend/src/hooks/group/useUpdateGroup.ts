@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
-import { updateGroup } from "../service/group.service";
-import { useChatStore } from "../store/chat.store";
-import { syncUpdatedGroup } from "../utils/group-cache.utils";
+import { useChatStore } from "../../store/chat.store";
+import { updateGroup } from "../../service/group.service";
+import { syncUpdatedGroup } from "../../utils/group-cache.utils";
+
 
 export const useUpdateGroup = () => {
 

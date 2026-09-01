@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
-import { useChatStore } from "../store/chat.store";
-import { joinRoom, leaveRoom } from "../service/socket.service";
+import { useChatStore } from "../../store/chat.store";
+import { joinRoom, leaveRoom } from "../../service/socket.service";
+
 
 export const useRoom = () => {
     const selectedChat = useChatStore((state) => state.selectedChat);

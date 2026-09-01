@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { getMessages } from "../service/message.service";
+import { getMessages } from "../../service/message.service";
+
 
 export const messageKeys = {
     all: ["messages"] as const,

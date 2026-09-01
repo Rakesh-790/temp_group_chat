@@ -1,4 +1,4 @@
-import { useGroups } from "../../hooks/useGroups";
+import { useGroups } from "../../hooks/group/useGroups";
 import type { SortType } from "../layout/Sidebar";
 import ChatItem from "./ChatItem";
 

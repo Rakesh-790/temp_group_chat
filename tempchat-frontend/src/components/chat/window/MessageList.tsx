@@ -3,10 +3,11 @@ import { useChatStore } from "../../../store/chat.store";
 import { mapMessage } from "../../../utils/message.mapper";
 import MessageBubble from "./MessageBubble";
 import DateSeparator from "./DateSeparator";
-import { useMessages } from "../../../hooks/useMessage";
 import SystemMessage from "../SystemMessage";
-import { useDeliveryReceipt } from "../../../hooks/useDeliveryRecipt";
-import { useReadReceipt } from "../../../hooks/useReadReceipt";
+import { useMessages } from "../../../hooks/chat/useMessage";
+import { useDeliveryReceipt } from "../../../hooks/chat/useDeliveryRecipt";
+import { useReadReceipt } from "../../../hooks/chat/useReadReceipt";
+
 
 const MessageList = () => {
 

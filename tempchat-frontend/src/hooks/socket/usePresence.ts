@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { socket } from "../api/socket";
-import type { GroupsResponse } from "../types/group.types";
+import type { GroupsResponse } from "../../types/group.types";
+import { socket } from "../../api/socket";
+
 
 type UserOnlinePayload = {
     userId: string;

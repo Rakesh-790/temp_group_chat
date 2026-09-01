@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useChatStore } from "../store/chat.store";
-import { assignRole } from "../service/group.service";
 import toast from "react-hot-toast";
+import { useChatStore } from "../../store/chat.store";
+import { assignRole } from "../../service/group.service";
 
 export const useAssignRole = () => {
     const queryClient = useQueryClient();

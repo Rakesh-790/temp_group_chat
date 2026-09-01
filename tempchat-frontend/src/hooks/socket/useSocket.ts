@@ -1,11 +1,9 @@
 import { useEffect } from "react";
-import { socket } from "../api/socket";
-import { useAuthStore } from "../store/auth.store";
-import {
-    connectSocket,
-    disconnectSocket,
-} from "../service/socket.service";
-import { registerGroupEvents } from "../socket/registerGroupEvents";
+import { useAuthStore } from "../../store/auth.store";
+import { connectSocket, disconnectSocket } from "../../service/socket.service";
+import { registerGroupEvents } from "../../socket/registerGroupEvents";
+import { socket } from "../../api/socket";
+
 
 export const useSocket = () => {
 

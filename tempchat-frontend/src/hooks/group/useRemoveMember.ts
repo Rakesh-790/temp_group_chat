@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { removeMember } from "../../service/group.service";
 
-import { removeMember } from "../service/group.service";
 
 export const useRemoveMember = () => {
 

@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import { useChatStore } from "../../store/chat.store";
+import { deleteGroup } from "../../service/group.service";
 
-import { deleteGroup } from "../service/group.service";
-import { useChatStore } from "../store/chat.store";
 
 export const useDeleteGroup = () => {
     const queryClient = useQueryClient();

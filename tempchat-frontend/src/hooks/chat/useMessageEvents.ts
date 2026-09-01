@@ -1,11 +1,12 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { socket } from "../api/socket";
-import type { ApiMessage, GetMessagesResponse, MessageDeliveryUpdate, MessageReadUpdate } from "../types/message.types";
-import type { Group } from "../types/group.types";
 import { messageKeys } from "./useMessage";
-import { useAuthStore } from "../store/auth.store";
-import { markMessagesDelivered } from "../service/socket.service";
+import { useAuthStore } from "../../store/auth.store";
+import type { ApiMessage, GetMessagesResponse, MessageDeliveryUpdate, MessageReadUpdate } from "../../types/message.types";
+import type { Group } from "../../types/group.types";
+import { markMessagesDelivered } from "../../service/socket.service";
+import { socket } from "../../api/socket";
+
 
 export const useMessageEvents = () => {
 
